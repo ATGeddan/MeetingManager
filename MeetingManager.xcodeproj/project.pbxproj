@@ -8,20 +8,54 @@
 
 /* Begin PBXBuildFile section */
 		26D3F6C520BE02960072FA38 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6C420BE02960072FA38 /* AppDelegate.swift */; };
-		26D3F6C720BE02960072FA38 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6C620BE02960072FA38 /* ViewController.swift */; };
 		26D3F6CA20BE02960072FA38 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26D3F6C820BE02960072FA38 /* Main.storyboard */; };
 		26D3F6CC20BE02990072FA38 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26D3F6CB20BE02990072FA38 /* Assets.xcassets */; };
 		26D3F6CF20BE02990072FA38 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26D3F6CD20BE02990072FA38 /* LaunchScreen.storyboard */; };
+		26D3F6E120BE03100072FA38 /* UsersTableVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6D720BE030E0072FA38 /* UsersTableVC.swift */; };
+		26D3F6E220BE03100072FA38 /* MeetingVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6D820BE030E0072FA38 /* MeetingVC.swift */; };
+		26D3F6E320BE03100072FA38 /* LoginVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6D920BE030E0072FA38 /* LoginVC.swift */; };
+		26D3F6E420BE03100072FA38 /* WelcomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6DA20BE030E0072FA38 /* WelcomeVC.swift */; };
+		26D3F6E520BE03100072FA38 /* CreateTeamVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6DB20BE030F0072FA38 /* CreateTeamVC.swift */; };
+		26D3F6E620BE03100072FA38 /* HomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6DC20BE030F0072FA38 /* HomeVC.swift */; };
+		26D3F6E720BE03100072FA38 /* PublicProfileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6DD20BE030F0072FA38 /* PublicProfileVC.swift */; };
+		26D3F6E820BE03100072FA38 /* ProfileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6DE20BE030F0072FA38 /* ProfileVC.swift */; };
+		26D3F6E920BE03100072FA38 /* RegisterVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6DF20BE030F0072FA38 /* RegisterVC.swift */; };
+		26D3F6EA20BE03100072FA38 /* MeetingAddVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6E020BE03100072FA38 /* MeetingAddVC.swift */; };
+		26D3F6EF20BE03540072FA38 /* Shadow&ImageURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6EC20BE03530072FA38 /* Shadow&ImageURL.swift */; };
+		26D3F6F020BE03540072FA38 /* SLImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6ED20BE03530072FA38 /* SLImageView.swift */; };
+		26D3F6F120BE03540072FA38 /* XMSegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6EE20BE03530072FA38 /* XMSegmentedControl.swift */; };
+		26D3F6F520BE03670072FA38 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6F320BE03660072FA38 /* Models.swift */; };
+		26D3F6F620BE03670072FA38 /* cells.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6F420BE03670072FA38 /* cells.swift */; };
+		26D3F6FA20BE06970072FA38 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 26D3F6F920BE06970072FA38 /* GoogleService-Info.plist */; };
+		9AF69351182FCEC034C7FF70 /* Pods_MeetingManager.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 53C548268BCAF3B787A508C5 /* Pods_MeetingManager.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		044725D78FCCE4E64D13F491 /* Pods-MeetingManager.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeetingManager.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MeetingManager/Pods-MeetingManager.debug.xcconfig"; sourceTree = "<group>"; };
+		25A660F79FD5A94C1AAE5BFE /* Pods-MeetingManager.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeetingManager.release.xcconfig"; path = "Pods/Target Support Files/Pods-MeetingManager/Pods-MeetingManager.release.xcconfig"; sourceTree = "<group>"; };
 		26D3F6C120BE02960072FA38 /* MeetingManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MeetingManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		26D3F6C420BE02960072FA38 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		26D3F6C620BE02960072FA38 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		26D3F6C920BE02960072FA38 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		26D3F6CB20BE02990072FA38 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		26D3F6CE20BE02990072FA38 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		26D3F6D020BE02990072FA38 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		26D3F6D720BE030E0072FA38 /* UsersTableVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UsersTableVC.swift; sourceTree = "<group>"; };
+		26D3F6D820BE030E0072FA38 /* MeetingVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeetingVC.swift; sourceTree = "<group>"; };
+		26D3F6D920BE030E0072FA38 /* LoginVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LoginVC.swift; sourceTree = "<group>"; };
+		26D3F6DA20BE030E0072FA38 /* WelcomeVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WelcomeVC.swift; sourceTree = "<group>"; };
+		26D3F6DB20BE030F0072FA38 /* CreateTeamVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateTeamVC.swift; sourceTree = "<group>"; };
+		26D3F6DC20BE030F0072FA38 /* HomeVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeVC.swift; sourceTree = "<group>"; };
+		26D3F6DD20BE030F0072FA38 /* PublicProfileVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublicProfileVC.swift; sourceTree = "<group>"; };
+		26D3F6DE20BE030F0072FA38 /* ProfileVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileVC.swift; sourceTree = "<group>"; };
+		26D3F6DF20BE030F0072FA38 /* RegisterVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterVC.swift; sourceTree = "<group>"; };
+		26D3F6E020BE03100072FA38 /* MeetingAddVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeetingAddVC.swift; sourceTree = "<group>"; };
+		26D3F6EC20BE03530072FA38 /* Shadow&ImageURL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Shadow&ImageURL.swift"; sourceTree = "<group>"; };
+		26D3F6ED20BE03530072FA38 /* SLImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SLImageView.swift; sourceTree = "<group>"; };
+		26D3F6EE20BE03530072FA38 /* XMSegmentedControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XMSegmentedControl.swift; sourceTree = "<group>"; };
+		26D3F6F320BE03660072FA38 /* Models.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		26D3F6F420BE03670072FA38 /* cells.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = cells.swift; sourceTree = "<group>"; };
+		26D3F6F920BE06970072FA38 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		53C548268BCAF3B787A508C5 /* Pods_MeetingManager.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MeetingManager.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,6 +63,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9AF69351182FCEC034C7FF70 /* Pods_MeetingManager.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -40,6 +75,8 @@
 			children = (
 				26D3F6C320BE02960072FA38 /* MeetingManager */,
 				26D3F6C220BE02960072FA38 /* Products */,
+				FAE4C6938032784054D95B10 /* Pods */,
+				C4B0D423D72B26472B62F5C6 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -54,14 +91,70 @@
 		26D3F6C320BE02960072FA38 /* MeetingManager */ = {
 			isa = PBXGroup;
 			children = (
+				26D3F6EB20BE03410072FA38 /* Libraries & Extensions */,
+				26D3F6F220BE03570072FA38 /* Models & Cells */,
+				26D3F6D620BE02F40072FA38 /* Controllers */,
 				26D3F6C420BE02960072FA38 /* AppDelegate.swift */,
-				26D3F6C620BE02960072FA38 /* ViewController.swift */,
 				26D3F6C820BE02960072FA38 /* Main.storyboard */,
 				26D3F6CB20BE02990072FA38 /* Assets.xcassets */,
 				26D3F6CD20BE02990072FA38 /* LaunchScreen.storyboard */,
 				26D3F6D020BE02990072FA38 /* Info.plist */,
+				26D3F6F920BE06970072FA38 /* GoogleService-Info.plist */,
 			);
 			path = MeetingManager;
+			sourceTree = "<group>";
+		};
+		26D3F6D620BE02F40072FA38 /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				26D3F6DF20BE030F0072FA38 /* RegisterVC.swift */,
+				26D3F6D920BE030E0072FA38 /* LoginVC.swift */,
+				26D3F6DC20BE030F0072FA38 /* HomeVC.swift */,
+				26D3F6DE20BE030F0072FA38 /* ProfileVC.swift */,
+				26D3F6DD20BE030F0072FA38 /* PublicProfileVC.swift */,
+				26D3F6D720BE030E0072FA38 /* UsersTableVC.swift */,
+				26D3F6E020BE03100072FA38 /* MeetingAddVC.swift */,
+				26D3F6D820BE030E0072FA38 /* MeetingVC.swift */,
+				26D3F6DA20BE030E0072FA38 /* WelcomeVC.swift */,
+				26D3F6DB20BE030F0072FA38 /* CreateTeamVC.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
+		26D3F6EB20BE03410072FA38 /* Libraries & Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				26D3F6EC20BE03530072FA38 /* Shadow&ImageURL.swift */,
+				26D3F6ED20BE03530072FA38 /* SLImageView.swift */,
+				26D3F6EE20BE03530072FA38 /* XMSegmentedControl.swift */,
+			);
+			path = "Libraries & Extensions";
+			sourceTree = "<group>";
+		};
+		26D3F6F220BE03570072FA38 /* Models & Cells */ = {
+			isa = PBXGroup;
+			children = (
+				26D3F6F320BE03660072FA38 /* Models.swift */,
+				26D3F6F420BE03670072FA38 /* cells.swift */,
+			);
+			path = "Models & Cells";
+			sourceTree = "<group>";
+		};
+		C4B0D423D72B26472B62F5C6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				53C548268BCAF3B787A508C5 /* Pods_MeetingManager.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		FAE4C6938032784054D95B10 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				044725D78FCCE4E64D13F491 /* Pods-MeetingManager.debug.xcconfig */,
+				25A660F79FD5A94C1AAE5BFE /* Pods-MeetingManager.release.xcconfig */,
+			);
+			name = Pods;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -71,9 +164,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 26D3F6D320BE02990072FA38 /* Build configuration list for PBXNativeTarget "MeetingManager" */;
 			buildPhases = (
+				7A0F252469B9C72AAEB4B799 /* [CP] Check Pods Manifest.lock */,
 				26D3F6BD20BE02960072FA38 /* Sources */,
 				26D3F6BE20BE02960072FA38 /* Frameworks */,
 				26D3F6BF20BE02960072FA38 /* Resources */,
+				BFCF56E91D628B6F98DE0398 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -123,6 +218,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				26D3F6CF20BE02990072FA38 /* LaunchScreen.storyboard in Resources */,
+				26D3F6FA20BE06970072FA38 /* GoogleService-Info.plist in Resources */,
 				26D3F6CC20BE02990072FA38 /* Assets.xcassets in Resources */,
 				26D3F6CA20BE02960072FA38 /* Main.storyboard in Resources */,
 			);
@@ -130,13 +226,78 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		7A0F252469B9C72AAEB4B799 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MeetingManager-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		BFCF56E91D628B6F98DE0398 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-MeetingManager/Pods-MeetingManager-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/GTMSessionFetcher/GTMSessionFetcher.framework",
+				"${BUILT_PRODUCTS_DIR}/GoogleToolboxForMac/GoogleToolboxForMac.framework",
+				"${BUILT_PRODUCTS_DIR}/IQKeyboardManagerSwift/IQKeyboardManagerSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/Kingfisher/Kingfisher.framework",
+				"${BUILT_PRODUCTS_DIR}/SVProgressHUD/SVProgressHUD.framework",
+				"${BUILT_PRODUCTS_DIR}/leveldb-library/leveldb.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GTMSessionFetcher.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleToolboxForMac.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IQKeyboardManagerSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Kingfisher.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SVProgressHUD.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/leveldb.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MeetingManager/Pods-MeetingManager-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		26D3F6BD20BE02960072FA38 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26D3F6C720BE02960072FA38 /* ViewController.swift in Sources */,
+				26D3F6E820BE03100072FA38 /* ProfileVC.swift in Sources */,
+				26D3F6E220BE03100072FA38 /* MeetingVC.swift in Sources */,
+				26D3F6F120BE03540072FA38 /* XMSegmentedControl.swift in Sources */,
+				26D3F6E720BE03100072FA38 /* PublicProfileVC.swift in Sources */,
+				26D3F6E620BE03100072FA38 /* HomeVC.swift in Sources */,
+				26D3F6EA20BE03100072FA38 /* MeetingAddVC.swift in Sources */,
+				26D3F6E920BE03100072FA38 /* RegisterVC.swift in Sources */,
+				26D3F6E120BE03100072FA38 /* UsersTableVC.swift in Sources */,
+				26D3F6E420BE03100072FA38 /* WelcomeVC.swift in Sources */,
+				26D3F6F020BE03540072FA38 /* SLImageView.swift in Sources */,
+				26D3F6F520BE03670072FA38 /* Models.swift in Sources */,
+				26D3F6E520BE03100072FA38 /* CreateTeamVC.swift in Sources */,
+				26D3F6F620BE03670072FA38 /* cells.swift in Sources */,
 				26D3F6C520BE02960072FA38 /* AppDelegate.swift in Sources */,
+				26D3F6EF20BE03540072FA38 /* Shadow&ImageURL.swift in Sources */,
+				26D3F6E320BE03100072FA38 /* LoginVC.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -278,6 +439,7 @@
 		};
 		26D3F6D420BE02990072FA38 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 044725D78FCCE4E64D13F491 /* Pods-MeetingManager.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -296,6 +458,7 @@
 		};
 		26D3F6D520BE02990072FA38 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 25A660F79FD5A94C1AAE5BFE /* Pods-MeetingManager.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;

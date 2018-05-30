@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AD_UNIT_ID_FOR_BANNER_TEST</key>
+	<string>ca-app-pub-3940256099942544/2934735716</string>
+	<key>AD_UNIT_ID_FOR_INTERSTITIAL_TEST</key>
+	<string>ca-app-pub-3940256099942544/4411468910</string>
+	<key>CLIENT_ID</key>
+	<string>742338428907-rjs62ls79rkku88h8fsj0me3bgjb0me4.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.742338428907-rjs62ls79rkku88h8fsj0me3bgjb0me4</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAelUY9W9FdjD3U5tuenyoWMG5glzqU_3Y</string>
+	<key>GCM_SENDER_ID</key>
+	<string>742338428907</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>AEltabbal.MeetingManager</string>
+	<key>PROJECT_ID</key>
+	<string>meetingmanager-b8254</string>
+	<key>STORAGE_BUCKET</key>
+	<string>meetingmanager-b8254.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<true></true>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<false></false>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:742338428907:ios:2be7e8a435c0d483</string>
+	<key>DATABASE_URL</key>
+	<string>https://meetingmanager-b8254.firebaseio.com</string>
+</dict>
+</plist>
