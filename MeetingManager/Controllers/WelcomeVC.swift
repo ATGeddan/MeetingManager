@@ -51,7 +51,9 @@ class WelcomeVC: UIViewController {
     self.performSegue(withIdentifier: "joined", sender: self.myUser)
     })
     } else { // Wrong name or Pass
-    print("Wrong Name or Pass")
+        let alert = UIAlertController(title: "Incorrect", message: "Team name or password is incorrect", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Got it", style: .default, handler: nil))
+        self.present(alert,animated: true,completion: nil)
     }
     }
     }

@@ -10,7 +10,7 @@ import UIKit
 import Firebase
 import Kingfisher
 
-class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSource {
+class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSource,changeAdminDelegate {
     
     @IBOutlet weak var tableView: UITableView!
     var myUser = User()
@@ -30,11 +30,17 @@ class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSourc
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell1", for: indexPath) as! cell1
-        cell.cellName.text = users[indexPath.row].userFirstName + " " + users[indexPath.row].userLastName
-        let url = URL(string: users[indexPath.row].imageURL)
+        let user = users[indexPath.row]
+        cell.cellName.text = user.userFirstName + " " + user.userLastName
+        let url = URL(string: user.imageURL)
         cell.cellImage.kf.setImage(with: url)
         cell.cellImage.layer.cornerRadius = cell.cellImage.frame.size.width / 2
-        cell.cellPosition.text = users[indexPath.row].position
+        cell.cellPosition.text = user.position
+        if user.userID == myTeam.adminID {
+            cell.adminBadge.isHidden = false
+        } else {
+            cell.adminBadge.isHidden = true
+        }
         return cell
     }
     
@@ -47,9 +53,15 @@ class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSourc
         performSegue(withIdentifier: "showProfile", sender: selectedUser)
     }
     
+    func didChangeAdmin(id:String) {
+        myTeam.updateAdmin(id: id)
+        tableView.reloadData()
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
 
         if let destination = segue.destination as? PublicProfileVC {
+            destination.delegate = self
             let backItem = UIBarButtonItem()
             backItem.title = ""
             navigationItem.backBarButtonItem = backItem

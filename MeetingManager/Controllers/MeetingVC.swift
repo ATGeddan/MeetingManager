@@ -59,6 +59,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         navigationController?.popToRootViewController(animated: true)
     }
     
+    //______________________________________________________________________________________________________________
     // MARK: Setting up ViewDidLoad
     
     func addSegmentedController() {
@@ -127,7 +128,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         commentField.endEditing(true)
     }
 
-    
+    //______________________________________________________________________________________________________________
     // MARK: Date Picker
     
     func createDatePicker() {
@@ -149,7 +150,8 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         dateField.text = dateString
         self.view.endEditing(true)
     }
-
+    
+    //______________________________________________________________________________________________________________
     // MARK: Edit Clicked & Delete
 
     @IBAction func ediTClicked(_ sender: Any) {
@@ -212,6 +214,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         }
     }
     
+    //______________________________________________________________________________________________________________
     // MARK: image View
 
     @IBOutlet weak var imageScrollView: UIScrollView!
@@ -363,7 +366,9 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         self.navigationController?.navigationBar.isHidden = false
     }
     
+    //______________________________________________________________________________________________________________
     // MARK: TableViews methods
+    
     @IBOutlet weak var commentPlaceholder: UIView!
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -454,8 +459,9 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         }
     }
     
-    
+    //______________________________________________________________________________________________________________
     // MARK: Comment Section
+    
     @IBOutlet var commentField: UITextField!
     var comments = [Comment]()
     @IBOutlet var sendButton: UIButton!
@@ -498,7 +504,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         }
     }
     
-    
+    //______________________________________________________________________________________________________________
     // MARK: Task View
     @IBOutlet weak var taskField: UITextField!
     var addingTask = false

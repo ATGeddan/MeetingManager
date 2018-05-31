@@ -9,9 +9,11 @@
 import UIKit
 import Firebase
 
-class RegisterVC: UIViewController {
+class RegisterVC: UIViewController,UITextFieldDelegate {
+    @IBOutlet weak var correct: UIImageView!
+    @IBOutlet weak var wrong: UIImageView!
+    @IBOutlet weak var confirmField: UITextField!
     @IBOutlet weak var birthField: UITextField!
-    @IBOutlet weak var errorLabel: UILabel!
     @IBOutlet weak var emailField: UITextField!
     @IBOutlet weak var passField: UITextField!
     @IBOutlet weak var firstField: UITextField!
@@ -22,25 +24,61 @@ class RegisterVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         createDatePicker()
+        confirmField.delegate = self
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
         self.navigationController?.view.backgroundColor = .clear
 
     }
-
-
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        correct.isHidden = true
+        wrong.isHidden = true
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        if confirmField.text == passField.text {
+            correct.isHidden = false
+            wrong.isHidden = true
+        } else {
+            correct.isHidden = true
+            wrong.isHidden = false
+        }
+    }
+    
     @IBAction func registerPressed(_ sender: Any) {
         guard let email = emailField.text ,let password = passField.text else { return }
-        
-        Auth.auth().createUser(withEmail: email, password: password) { (user, error) in
-            if error != nil {
-                self.errorLabel.isHidden = false
-                print(error!)
-            } else {
-                self.createProfile()
-                self.errorLabel.isHidden = true
-                self.performSegue(withIdentifier: "registered", sender: self.myUser)
+        if passField.text == confirmField.text {
+            Auth.auth().createUser(withEmail: email, password: password) { (user, error) in
+                if error != nil {
+                    if let errCode = AuthErrorCode(rawValue: error!._code) {
+                        
+                        switch errCode {
+                        case .invalidEmail:
+                            let alertMessage = UIAlertController(title: "Invalid Email", message: "Please check the entered email address", preferredStyle: .alert)
+                            alertMessage.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                            self.present(alertMessage, animated: true, completion: nil)
+                            
+                        case .emailAlreadyInUse:
+                            let alertMessage = UIAlertController(title: "E-mail already used", message: "This e-mail has already signed up", preferredStyle: .alert)
+                            alertMessage.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                            self.present(alertMessage, animated: true, completion: nil)
+                            
+                        case .weakPassword:
+                            let alertMessage = UIAlertController(title: "Password is weak", message: "Make sure password is more than 6 characters", preferredStyle: .alert)
+                            alertMessage.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                            self.present(alertMessage, animated: true, completion: nil)
+                            
+                        default:
+                            print("Other error!")
+                        }
+                        
+                    }
+                } else {
+                    self.createProfile()
+                    self.performSegue(withIdentifier: "registered", sender: self.myUser)
+                }
             }
         }
     }
@@ -55,7 +93,6 @@ class RegisterVC: UIViewController {
         userDB.child(uid).setValue(userDictionary){
             (error, reference) in
             if error != nil {
-                
                 print(error!)
             }
         }

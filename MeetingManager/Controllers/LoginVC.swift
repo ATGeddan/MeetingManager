@@ -10,6 +10,9 @@ import UIKit
 import Firebase
 
 class LoginVC: UIViewController {
+    @IBOutlet weak var signViewLeading: NSLayoutConstraint!
+    @IBOutlet weak var resetViewLeading: NSLayoutConstraint!
+    @IBOutlet weak var emailResetField: UITextField!
     @IBOutlet weak var emailField: UITextField!
     @IBOutlet weak var passField: UITextField!
     
@@ -26,8 +29,10 @@ class LoginVC: UIViewController {
         Auth.auth().signIn(withEmail: emailField.text!, password: passField.text!) { (user, error) in
             if error != nil {
                 print(error!)
+                let alert = UIAlertController(title: "Ops", message: "Please make sure your e-mail and password are correct", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Got it", style: .default, handler: nil))
+                self.present(alert,animated: true,completion: nil)
             } else {
-                print("success loging in")
                 if let uid = Auth.auth().currentUser?.uid {
                 Database.database().reference().child("Users").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
                     if let dictionary = snapshot.value as? [String:AnyObject] {
@@ -62,6 +67,48 @@ class LoginVC: UIViewController {
                 }
             }
         })
+    }
+    
+    func switchBetween() {
+        if signViewLeading.constant == 0 {
+            UIView.animate(withDuration: 0.3) {
+                self.signViewLeading.constant = 375
+                self.resetViewLeading.constant = 0
+                self.emailResetField.text = self.emailField.text
+                self.view.layoutIfNeeded()
+            }
+        } else {
+            UIView.animate(withDuration: 0.3) {
+                self.signViewLeading.constant = 0
+                self.resetViewLeading.constant = -375
+                self.emailResetField.text = self.emailField.text
+                self.view.layoutIfNeeded()
+            }
+        }
+    }
+    
+    @IBAction func forgotPressed(_ sender: Any) {
+        switchBetween()
+    }
+    
+    @IBAction func backtoSign(_ sender: Any) {
+        switchBetween()
+    }
+    
+    @IBAction func resetPressed(_ sender: Any) {
+        guard let email = emailResetField.text else {return}
+        Auth.auth().sendPasswordReset(withEmail: email) { (err) in
+            if err != nil {
+                print(err!)
+            } else {
+                let alert = UIAlertController(title: "E-mail sent", message: "A password reset e-mail has been sent to you", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Thanks", style: .default, handler: { (action) in
+                    self.switchBetween()
+                }))
+                self.present(alert, animated: true, completion: nil)
+            }
+            
+        }
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

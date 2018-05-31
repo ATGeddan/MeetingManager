@@ -11,9 +11,17 @@ import Firebase
 import Kingfisher
 
 class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
+    @IBOutlet weak var passBG: UIImageView!
+    @IBOutlet weak var confirmField: UITextField!
+    @IBOutlet weak var newPassField: UITextField!
+    @IBOutlet weak var oldPassField: UITextField!
+    @IBOutlet weak var viewTop: NSLayoutConstraint!
+    @IBOutlet weak var confirmBtn: UIButton!
+    @IBOutlet weak var changeLabel: UILabel!
+    @IBOutlet weak var passView: UIView!
+    @IBOutlet weak var changePassBtn: UIButton!
     @IBOutlet weak var teamView: UIView!
     @IBOutlet weak var editTeamBtn: UIButton!
-    @IBOutlet weak var teamAdmin: UILabel!
     @IBOutlet weak var teamOrg: UILabel!
     @IBOutlet weak var teamCountry: UILabel!
     @IBOutlet weak var teamName: UILabel!
@@ -39,6 +47,12 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         checkForUpdates()
         getTeamData()
         getPersonalInfo()
+        self.changeLabel.alpha = 0
+        self.confirmBtn.alpha = 0
+        self.passBG.alpha = 0
+        self.oldPassField.alpha = 0
+        self.newPassField.alpha = 0
+        self.confirmField.alpha = 0
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "Add-1"), style: .plain, target: self, action: #selector(addClicked(_:)))
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
@@ -144,7 +158,6 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
                 self.teamName.text = myTeam.name
                 self.teamOrg.text = myTeam.organization
                 self.teamCountry.text = myTeam.country
-                self.teamAdmin.text = "Admin: \(myTeam.adminName)"
                 self.teamInfo.text = myTeam.info
                 if myTeam.adminID == self.myUser.userID {
                     self.editTeamBtn.isHidden = false
@@ -170,6 +183,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
                 countryField.text = team.country
                 orgField.text = team.organization
                 teamInfo.backgroundColor = UIColor(red: 169/255, green: 183/255, blue: 211/255, alpha: 0.15)
+                changePassBtn.isHidden = false
                 deleteButton.isHidden = false
                 teamInfo.isEditable = true
                 teamName.isHidden = true
@@ -185,6 +199,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
                 teamCountry.text = team.country
                 teamOrg.text = team.organization
                 teamInfo.backgroundColor = UIColor.clear
+                changePassBtn.isHidden = true
                 deleteButton.isHidden = true
                 teamInfo.isEditable = false
                 teamName.isHidden = false
@@ -193,9 +208,62 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
                 nameField.isHidden = true
                 orgField.isHidden = true
                 countryField.isHidden = true
+                if viewTop.constant != 32 {
+                    openClosePass()
+                }
                 let edits = ["name":team.name,"org":team.organization,"country":team.country,"info":teamInfo.text!]
                 Database.database().reference().child("Teams").child(myUser.teamID).child("teaminfo").updateChildValues(edits)
                 Database.database().reference().child("teamRef").child(myUser.teamID).updateChildValues(["name":team.name])
+            }
+        }
+    }
+    
+    @IBAction func changePassPressed(_ sender: Any) {
+        openClosePass()
+    }
+    
+    @IBAction func confirmPass(_ sender: Any) {
+        if oldPassField.text == team.pass {
+            if newPassField.text == confirmField.text {
+                guard let newPass = newPassField.text else {return}
+                self.team.changePass(pass:newPass)
+                Database.database().reference().child("Teams").child(self.myUser.teamID).child("teaminfo").updateChildValues(["password":newPass])
+                Database.database().reference().child("teamRef").child(self.myUser.teamID).updateChildValues(["password":newPass])
+                self.openClosePass()
+            } else {
+                let alert = UIAlertController(title: "Confirm new password", message: "Your new password and confirm password do not match", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                self.present(alert,animated: true,completion: nil)
+            }
+        } else {
+            let alert = UIAlertController(title: "Incorrect", message: "Old password is incorrect", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            self.present(alert,animated: true,completion: nil)
+        }
+    }
+    
+    func openClosePass() {
+        if viewTop.constant == 32 {
+            UIView.animate(withDuration: 0.3) {
+                self.viewTop.constant = 208
+                self.changeLabel.alpha = 1
+                self.confirmBtn.alpha = 1
+                self.oldPassField.alpha = 1
+                self.newPassField.alpha = 1
+                self.confirmField.alpha = 1
+                self.passBG.alpha = 1
+                self.view.layoutIfNeeded()
+            }
+        } else {
+            UIView.animate(withDuration: 0.3) {
+                self.viewTop.constant = 32
+                self.changeLabel.alpha = 0
+                self.confirmBtn.alpha = 0
+                self.passBG.alpha = 0
+                self.oldPassField.alpha = 0
+                self.newPassField.alpha = 0
+                self.confirmField.alpha = 0
+                self.view.layoutIfNeeded()
             }
         }
     }
@@ -277,17 +345,15 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         
         if self.menuLeading.constant != -12 {
             UIView.animate(withDuration: 0.4) {
-                self.tableView.alpha = 0.5
+                self.passView.alpha = 0.5
                 self.teamView.alpha = 0.5
-                self.cellPlaceHolder.alpha = 0.5
                 self.menuLeading.constant = -12
                 self.view.layoutIfNeeded()
             }
         } else {
             UIView.animate(withDuration: 0.4) {
-                self.tableView.alpha = 1
+                self.passView.alpha = 1
                 self.teamView.alpha = 1
-                self.cellPlaceHolder.alpha = 1
                 self.menuLeading.constant = -222
                 self.view.layoutIfNeeded()
             }
@@ -299,17 +365,15 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
             let translation = sender.translation(in: self.view).x
             if translation > 20 { // Swipe right
                 UIView.animate(withDuration: 0.4) {
-                    self.tableView.alpha = 0.5
+                    self.passView.alpha = 0.5
                     self.teamView.alpha = 0.5
-                    self.cellPlaceHolder.alpha = 0.5
                     self.menuLeading.constant = -12
                     self.view.layoutIfNeeded()
                 }
             } else if translation < -20 { // Swipe left
                 UIView.animate(withDuration: 0.4) {
-                    self.tableView.alpha = 1
+                    self.passView.alpha = 1
                     self.teamView.alpha = 1
-                    self.cellPlaceHolder.alpha = 1
                     self.menuLeading.constant = -222
                     self.view.layoutIfNeeded()
                 }
@@ -330,6 +394,11 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        changePassBtn.isHidden = true
+        deleteButton.isHidden = true
+        if viewTop.constant != 32 {
+            self.openClosePass()
+        }
         menuLeading.constant = -222
         tableView.alpha = 1
         teamView.alpha = 1

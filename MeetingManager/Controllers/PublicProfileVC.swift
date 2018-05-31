@@ -10,6 +10,10 @@ import UIKit
 import Firebase
 import Kingfisher
 
+protocol changeAdminDelegate {
+    func didChangeAdmin(id:String)
+}
+
 class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,XMSegmentedControlDelegate {
     
     @IBOutlet weak var birthLabel: UILabel!
@@ -32,6 +36,7 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
     var tasks = [Task]()
     var completedTasks = [Task]()
     var segmentedControl3 = XMSegmentedControl()
+    var delegate:changeAdminDelegate!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,11 +44,23 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
         retrieveTasks()
         setupSegmentedController()
         if myUser.userID == myTeam.adminID && selectedUser.userID != myTeam.adminID {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "makeAdmin"), style: .plain, target: self, action: #selector(changeAdmin))
+            navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "makeAdmin"), style: .plain, target: self, action: #selector(confirmAdmin))
         }
     }
     
-    @objc func changeAdmin() {
+    @objc func confirmAdmin() {
+        let alert = UIAlertController(title: "Are You Sure?", message: "Do you want to make \(selectedUser.userFirstName) the team admin?", preferredStyle: UIAlertControllerStyle.alert)
+        
+        alert.addAction(UIAlertAction(title: "Confirm", style: UIAlertActionStyle.default, handler: { action in
+            self.changeAdmin()
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+        
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    func changeAdmin() {
+        delegate?.didChangeAdmin(id: selectedUser.userID)
         Database.database().reference().child("Teams").child(myTeam.id).child("teaminfo").updateChildValues(["adminID":selectedUser.userID,"adminName":selectedUser.userFirstName+" "+selectedUser.userLastName])
         Database.database().reference().child("Teams").child(myTeam.id).child("Meetings").observeSingleEvent(of: .value) { (snap) in
             if let meetings = snap.children.allObjects as? [DataSnapshot] {

@@ -46,7 +46,9 @@ class CreateTeamVC: UIViewController,UITextFieldDelegate {
             }
             
         } else {     // error msg 
-            
+            let alert = UIAlertController(title: "Ops", message: "Please take a second look at the team name and password", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Got it", style: .default, handler: nil))
+            self.present(alert,animated: true,completion: nil)
         }
     }
     

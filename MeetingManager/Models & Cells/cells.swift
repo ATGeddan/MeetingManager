@@ -13,6 +13,7 @@ class cell1: UITableViewCell {
     @IBOutlet weak var cellImage: UIImageView!
     @IBOutlet weak var cellPosition: UILabel!
     @IBOutlet weak var cellBack: UIView!
+    @IBOutlet weak var adminBadge: UIImageView!
     
     override func awakeFromNib() {
         cellBack.layer.cornerRadius = 10

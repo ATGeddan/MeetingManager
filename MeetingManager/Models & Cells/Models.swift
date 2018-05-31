@@ -215,6 +215,10 @@ class Team {
     func updateAdmin(id:String) {
         _adminID = id
     }
+    
+    func changePass(pass:String) {
+        _pass = pass
+    }
 }
 
 // ------------------------------------------
