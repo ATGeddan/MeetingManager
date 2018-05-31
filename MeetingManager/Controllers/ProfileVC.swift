@@ -142,16 +142,17 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         
         let cell = taskTableView.dequeueReusableCell(withIdentifier: "myprofileCell", for: indexPath) as! profileCell
         if myTasks.count > 0 {
-        cell.taskLabel.text = myTasks[indexPath.row].task
-        if myTasks[indexPath.row].done == true {
-            taskTableView.selectRow(at: indexPath, animated: false, scrollPosition: UITableViewScrollPosition.none)
-            let view = UIImageView(image: UIImage(named: "checked"))
-            cell.accessoryView = view
-        } else {
-            taskTableView.deselectRow(at: indexPath, animated: false)
-            let view = UIImageView(image: UIImage(named: "check"))
-            cell.accessoryView = view
-        }
+            cell.taskLabel.text = myTasks[indexPath.row].task
+            cell.dateLabel.text = myTasks[indexPath.row].date
+            if myTasks[indexPath.row].done == true {
+                taskTableView.selectRow(at: indexPath, animated: false, scrollPosition: UITableViewScrollPosition.none)
+                let view = UIImageView(image: UIImage(named: "checked"))
+                cell.accessoryView = view
+            } else {
+                taskTableView.deselectRow(at: indexPath, animated: false)
+                let view = UIImageView(image: UIImage(named: "check"))
+                cell.accessoryView = view
+            }
         updateCount()
         } else {
         
@@ -160,7 +161,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 48.0
+        return 65.0
     }
     
     func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {

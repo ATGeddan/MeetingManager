@@ -22,6 +22,7 @@ class MeetingAddVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         createDatePicker()
+        dateField.text = DateFormatter.localizedString(from: NSDate() as Date, dateStyle: .medium, timeStyle: .none)
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(donePressed))
 
     }

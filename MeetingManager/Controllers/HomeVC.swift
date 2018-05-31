@@ -53,7 +53,6 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         self.oldPassField.alpha = 0
         self.newPassField.alpha = 0
         self.confirmField.alpha = 0
-        navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "Add-1"), style: .plain, target: self, action: #selector(addClicked(_:)))
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
@@ -399,10 +398,15 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         if viewTop.constant != 32 {
             self.openClosePass()
         }
+        if editingTeam == true {
+            self.editTeam(self)
+        }
         menuLeading.constant = -222
         tableView.alpha = 1
         teamView.alpha = 1
         cellPlaceHolder.alpha = 1
+        passView.alpha = 1
+        
         if let destination = segue.destination as? MeetingVC {
             if let model = sender as? MeetingModel {
                 destination.currentMeeting = model

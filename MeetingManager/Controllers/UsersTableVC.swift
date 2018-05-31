@@ -10,7 +10,7 @@ import UIKit
 import Firebase
 import Kingfisher
 
-class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSource,changeAdminDelegate {
+class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSource, changeAdminDelegate, didRemoveDelegate {
     
     @IBOutlet weak var tableView: UITableView!
     var myUser = User()
@@ -58,10 +58,17 @@ class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSourc
         tableView.reloadData()
     }
     
+    func didRemoveMember() {
+        users.removeAll()
+        getUsers()
+        tableView.reloadData()
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
 
         if let destination = segue.destination as? PublicProfileVC {
             destination.delegate = self
+            destination.delegate2 = self
             let backItem = UIBarButtonItem()
             backItem.title = ""
             navigationItem.backBarButtonItem = backItem

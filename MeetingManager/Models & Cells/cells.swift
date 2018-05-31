@@ -22,6 +22,8 @@ class cell1: UITableViewCell {
 }
 
 class commentCell: UITableViewCell {
+    @IBOutlet weak var deleteTaskBtn: UIButton!
+    @IBOutlet weak var deleteBtn: UIButton!
     @IBOutlet weak var commentThumb: UIImageView!
     @IBOutlet weak var commentName: UILabel!
     @IBOutlet weak var commentTime: UILabel!
@@ -34,6 +36,7 @@ class commentCell: UITableViewCell {
 class profileCell: UITableViewCell {
     @IBOutlet weak var taskLabel: UILabel!
     @IBOutlet weak var cellbackGround: UIView!
+    @IBOutlet weak var dateLabel: UILabel!
 }
 
 class homeCell: UITableViewCell {

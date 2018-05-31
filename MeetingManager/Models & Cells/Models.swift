@@ -298,6 +298,7 @@ class Comment {
     private var _time:String!
     private var _body:String!
     private var _ID:String!
+    private var _userID:String!
     
     var imageURL:String {
         return _imageURL
@@ -314,13 +315,17 @@ class Comment {
     var ID:String {
         return _ID
     }
+    var userID:String {
+        return _userID
+    }
     
-    init(name:String,time:String,body:String,url:String,id:String) {
+    init(name:String,time:String,body:String,url:String,id:String,userID:String) {
         _name = name
         _body = body
         _time = time
         _imageURL = url
         _ID = id
+        _userID = userID
     }
 }
 // ------------------------------------------
@@ -329,7 +334,7 @@ class Task {
     private var _task:String!
     private var _done = false
     private var _ID:String!
-    
+    private var _date:String!
 
     var task:String {
         return _task
@@ -339,6 +344,9 @@ class Task {
     }
     var ID:String{
         return _ID
+    }
+    var date:String{
+        return _date
     }
     
     init(data:Dictionary<String,AnyObject>) {
@@ -350,6 +358,9 @@ class Task {
         }
         if let ID2 = data["ID"] as? String {
             _ID = ID2
+        }
+        if let date = data["date"] as? String {
+            _date = date
         }
         
     }

@@ -402,6 +402,11 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                 cell.commentThumb.layer.cornerRadius = 30
                 cell.commentThumb.layer.borderWidth = 1
                 cell.commentThumb.layer.borderColor = UIColor.lightGray.cgColor
+            let myID = Auth.auth().currentUser?.uid
+            if myID == currentMeeting.meetingAdmin || myID == currentMeeting.teamAdmin || myID == comments[indexPath.row].userID {
+                cell.deleteBtn.tag = indexPath.row
+                cell.deleteBtn.isHidden = false
+            }
                 cell.commentName.text = comments[indexPath.row].name
                 cell.commentTime.text = comments[indexPath.row].time
                 cell.commentBody.text = comments[indexPath.row].body
@@ -411,6 +416,11 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             } else {
                 cell = taskTableView.dequeueReusableCell(withIdentifier: "taskCell", for: indexPath) as! commentCell
                 cell.taskBody.text = tasks[indexPath.row].task
+                let myID = Auth.auth().currentUser?.uid
+                if myID == currentMeeting.meetingAdmin || myID == currentMeeting.teamAdmin {
+                    cell.deleteTaskBtn.tag = indexPath.row
+                    cell.deleteTaskBtn.isHidden = false
+                }
             }
         } else if tableView.tag == 3 {
             cell = userstableView.dequeueReusableCell(withIdentifier: "userCell2", for: indexPath) as! commentCell
@@ -459,6 +469,8 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         }
     }
     
+
+    
     //______________________________________________________________________________________________________________
     // MARK: Comment Section
     
@@ -494,12 +506,30 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                         if let dictionary2 = snap.value as? [String:AnyObject] {
                             let commenter = User(data: dictionary2)
                             let name = commenter.userFirstName + " " + commenter.userLastName
-                            let comment = Comment(name:name,time:time,body:body,url:commenter.imageURL, id: comID)
+                            let comment = Comment(name:name,time:time,body:body,url:commenter.imageURL, id: comID,userID:UserID)
                             self.comments.insert(comment, at: 0)
                             self.commentstableView.reloadData()
                         }
                     })
                 }
+            }
+        }
+    }
+    
+    @IBAction func deleteComment(_ sender: UIButton) {
+        let alert = UIAlertController(title: "Delete?", message: "Do you want to save or delete this comment?", preferredStyle: UIAlertControllerStyle.alert)
+        alert.addAction(UIAlertAction(title: "Delete", style: UIAlertActionStyle.destructive, handler: { action in
+            self.deleteCommentTriggered(sender: sender)
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    func deleteCommentTriggered(sender:UIButton) {
+        meetingRef.child("Comments").child(currentMeeting.meetingID).child(comments[sender.tag].ID).removeValue { (error, ref) in
+            if error == nil {
+                self.comments.remove(at: sender.tag)
+                self.commentstableView.reloadData()
             }
         }
     }
@@ -518,7 +548,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     @IBOutlet var ComposeView: UIView!
     
     @IBAction func addClicked(_ sender: UIButton) {
-        if addingTask == false {
+        if addingTask == false { // First it unchecks the old selected users
             let selectedItems = userstableView.indexPathsForSelectedRows
             if selectedItems != nil {
             for x in selectedItems! {
@@ -528,14 +558,15 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                     cell.accessoryView = view
                 }
             }
-            }
+            } // Show users and text field
             addingTask = true
             UIView.animate(withDuration: 0.25) {
                 self.taskTableHeight.constant = 1
                 self.taskField.alpha = 1
                 self.view.layoutIfNeeded()
             }
-        } else if addingTask == true {
+            
+        } else if addingTask == true { // if a task is added
             if taskField.text != "" && chosenUsers != [] {
                 addTaskButton.isEnabled = false
                 UIView.animate(withDuration: 0.25) {
@@ -543,12 +574,13 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                     self.taskField.alpha = 0
                     self.view.layoutIfNeeded()
                 }
-                let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-                let databaseREF2 = meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).child("e\(timeStamp)")
-                let taskDict = ["task":self.taskField.text!,"done":false,"ID":"e\(timeStamp)"] as [String : Any]
+                let timestamp = DateFormatter.localizedString(from: NSDate() as Date, dateStyle: .medium, timeStyle: .none)
+                let newID = Int(NSDate.timeIntervalSinceReferenceDate*1000)
+                let databaseREF2 = meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).child("e\(newID)")
+                let taskDict = ["task":self.taskField.text!,"done":false,"ID":"e\(newID)","date":timestamp] as [String : Any]
                 databaseREF2.setValue(taskDict)
                 for x in 0...chosenUsers.count - 1 {
-                    let databaseREF = meetingRef.child("UserTasks").child(chosenUsers[x]).child("e\(timeStamp)")
+                    let databaseREF = meetingRef.child("UserTasks").child(chosenUsers[x]).child("e\(newID)")
                     databaseREF.setValue(taskDict) { (error, ref) in
                     if error != nil {
                         print(error!)
@@ -558,7 +590,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                     self.addTaskButton.isEnabled = true
                     }
                     }
-                } else {
+                } else { // if add was clicked to close, not add
                     addingTask = false
                     UIView.animate(withDuration: 0.25) {
                         self.taskTableHeight.constant = 290
@@ -575,6 +607,24 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             if let dicto2 = snapshot.value as? [String:AnyObject] {
                 let task = Task(data: dicto2)
                 self.tasks.append(task)
+                self.taskTableView.reloadData()
+            }
+        }
+    }
+    
+    @IBAction func deleteTaskAlert(_ sender: UIButton) {
+        let alert = UIAlertController(title: "Delete?", message: "Do you want to save or delete this task?", preferredStyle: UIAlertControllerStyle.alert)
+        alert.addAction(UIAlertAction(title: "Delete", style: UIAlertActionStyle.destructive, handler: { action in
+            self.deleteTaskTriggered(sender: sender)
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    func deleteTaskTriggered(sender: UIButton) {
+        meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).child(tasks[sender.tag].ID).removeValue { (error, ref) in
+            if error == nil {
+                self.tasks.remove(at: sender.tag)
                 self.taskTableView.reloadData()
             }
         }

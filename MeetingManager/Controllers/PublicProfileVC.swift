@@ -13,9 +13,14 @@ import Kingfisher
 protocol changeAdminDelegate {
     func didChangeAdmin(id:String)
 }
+protocol didRemoveDelegate {
+    func didRemoveMember()
+}
 
 class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,XMSegmentedControlDelegate {
     
+    @IBOutlet weak var removeBtn: UIButton!
+    @IBOutlet weak var makeAdminBtn: UIButton!
     @IBOutlet weak var birthLabel: UILabel!
     @IBOutlet weak var completedNumber: UILabel!
     @IBOutlet weak var phoneLabel: UILabel!
@@ -37,6 +42,7 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
     var completedTasks = [Task]()
     var segmentedControl3 = XMSegmentedControl()
     var delegate:changeAdminDelegate!
+    var delegate2:didRemoveDelegate!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,15 +50,27 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
         retrieveTasks()
         setupSegmentedController()
         if myUser.userID == myTeam.adminID && selectedUser.userID != myTeam.adminID {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "makeAdmin"), style: .plain, target: self, action: #selector(confirmAdmin))
+            makeAdminBtn.isHidden = false
+            removeBtn.isHidden = false
         }
     }
     
-    @objc func confirmAdmin() {
+    @IBAction func confirmAdmin(sender: UIButton) {
         let alert = UIAlertController(title: "Are You Sure?", message: "Do you want to make \(selectedUser.userFirstName) the team admin?", preferredStyle: UIAlertControllerStyle.alert)
         
         alert.addAction(UIAlertAction(title: "Confirm", style: UIAlertActionStyle.default, handler: { action in
             self.changeAdmin()
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+        
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    @IBAction func confirmRemove(sender: UIButton) {
+        let alert = UIAlertController(title: "Are You Sure?", message: "Do you want to remove \(selectedUser.userFirstName) from the team?", preferredStyle: UIAlertControllerStyle.alert)
+        
+        alert.addAction(UIAlertAction(title: "Remove", style: UIAlertActionStyle.destructive, handler: { action in
+            self.removeMember()
         }))
         alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
         
@@ -72,9 +90,21 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
                         
                     }
                 }
-                self.navigationItem.rightBarButtonItem = nil
+                self.makeAdminBtn.isHidden = true
+                self.removeBtn.isHidden = true
             }
         }
+    }
+    
+    func removeMember() {
+        Database.database().reference().child("Teams").child(self.myTeam.id).child("UserTasks").child(selectedUser.userID).removeValue()
+        Database.database().reference().child("Users").child(selectedUser.userID).updateChildValues(["team":""])
+        Database.database().reference().child("Teams").child(self.myTeam.id).child("Members").child(selectedUser.userID).removeValue { (err, ref) in
+            if err == nil {
+                self.delegate2?.didRemoveMember()
+            }
+        }
+        navigationController?.popViewController(animated: true)
     }
     
     func setupSegmentedController() {
@@ -131,21 +161,25 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tasksTable.dequeueReusableCell(withIdentifier: "profileCell", for: indexPath) as? profileCell
+        let cell = tasksTable.dequeueReusableCell(withIdentifier: "profileCell", for: indexPath) as! profileCell
         if tasks.count > 0 {
-            cell?.taskLabel.text = tasks[indexPath.row].task
-            cell?.cellbackGround.layer.cornerRadius = 5
+            cell.taskLabel.text = tasks[indexPath.row].task
+            cell.dateLabel.text = tasks[indexPath.row].date
             if tasks[indexPath.row].done == true {
                 tasksTable.selectRow(at: indexPath, animated: false, scrollPosition: UITableViewScrollPosition.none)
                 let view = UIImageView(image: UIImage(named: "checked"))
-                cell?.accessoryView = view
+                cell.accessoryView = view
             } else {
                 tasksTable.deselectRow(at: indexPath, animated: false)
                 let view = UIImageView(image: UIImage(named: "check"))
-                cell?.accessoryView = view
+                cell.accessoryView = view
             }
         }
-        return cell!
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 65.0
     }
     
     func updateCount(){
