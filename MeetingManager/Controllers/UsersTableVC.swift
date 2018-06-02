@@ -20,8 +20,13 @@ class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSourc
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        getUsers()
+        if myUser.userID == myTeam.adminID {
+            updateUsers()
+        } else {
+            getUsers()
+        }
         self.title = "MEMBERS"
+        tableView.addSubview(refreshControl)
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -64,6 +69,23 @@ class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSourc
         tableView.reloadData()
     }
     
+    lazy var refreshControl: UIRefreshControl = {
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action:
+            #selector(self.handleRefresh),
+                                 for: UIControlEvents.valueChanged)
+        refreshControl.tintColor = UIColor.white
+        
+        return refreshControl
+    }()
+    
+    @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
+        users.removeAll()
+        getUsers()
+        tableView.reloadData()
+        refreshControl.endRefreshing()
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
 
         if let destination = segue.destination as? PublicProfileVC {
@@ -81,12 +103,31 @@ class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSourc
     }
     
     func getUsers() {
-        Database.database().reference().child("Teams").child(myUser.teamID).child("Members").observe(.childAdded) { (snapshot) in
-            if let dictionary = snapshot.value as? [String:AnyObject] {
-                let user = User(data: dictionary)
-                self.users.append(user)
-                self.tableView.reloadData()
+        Database.database().reference().child("Teams").child(myUser.teamID).child("Members").observeSingleEvent(of: .value) { (snapshot) in
+            self.users = []
+            if let children = snapshot.children.allObjects as? [DataSnapshot] {
+                for child in children {
+                    if let dictionary = child.value as? [String:AnyObject] {
+                        let user = User(data: dictionary)
+                        self.users.append(user)
+                        self.tableView.reloadData()
+                    }
+                }
             }
+        }
+    }
+    
+    func updateUsers() {
+        let teamid = myUser.teamID
+        Database.database().reference().child("Teams").child(teamid!).child("Members").observe(.childAdded) { (snapshot) in
+            self.users = []
+            self.getUsers()
+            self.tableView.reloadData()
+        }
+        Database.database().reference().child("Teams").child(teamid!).child("Members").observe(.childRemoved) { (snapshot) in
+            self.users = []
+            self.getUsers()
+            self.tableView.reloadData()
         }
     }
 

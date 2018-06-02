@@ -29,15 +29,32 @@ class CreateTeamVC: UIViewController,UITextFieldDelegate {
 
     @IBAction func createPressed(_ sender: Any) {
         if nameField.text != "" && passField.text != "" && nameAvailable == true {
-            let teamID = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-            let teamDict = ["name":nameField.text!,"password":passField.text!,"org":orgField.text!,"country":countryField.text!,"info":infoField.text!,"adminID":myUser.userID,"id":"t\(teamID)","adminName":myUser.userFirstName + " " + myUser.userLastName]
-            myUser.teamID = "t\(teamID)"
-            let teamRef = ["name":nameField.text!,"password":passField.text!,"id":"t\(teamID)"]
-            Database.database().reference().child("teamRef").child("t\(teamID)").setValue(teamRef)
-            Database.database().reference().child("Teams").child("t\(teamID)").child("teaminfo").setValue(teamDict)
-            Database.database().reference().child("Users").child(myUser.userID).updateChildValues(["team":"t\(teamID)"])
-            let newMember = ["email" :myUser.userEmail,"firstname" : myUser.userFirstName,"lastname" : myUser.userLastName,"city" : myUser.userCity,"profilepicURL" : myUser.imageURL,"uid" : myUser.userID,"position":myUser.position,"birth":myUser.birth,"country":myUser.birth,"phone":myUser.phone,"team":"t\(teamID)"]
-            Database.database().reference().child("Teams").child("t\(teamID)").child("Members").child(myUser.userID).setValue(newMember) { (err, ref) in
+            let teamNewID = Database.database().reference().child("Teams").childByAutoId().key
+            let teamDict = ["name":nameField.text!,
+                            "password":passField.text!,
+                            "org":orgField.text!,
+                            "country":countryField.text!,
+                            "info":infoField.text!,
+                            "adminID":myUser.userID,
+                            "id":teamNewID,
+                            "adminName":myUser.userFirstName + " " + myUser.userLastName]
+            myUser.teamID = teamNewID
+            let teamRef = ["name":nameField.text!,"password":passField.text!,"id":teamNewID]
+            Database.database().reference().child("teamRef").child(teamNewID).setValue(teamRef)
+            Database.database().reference().child("Teams").child(teamNewID).child("teaminfo").setValue(teamDict)
+            Database.database().reference().child("Users").child(myUser.userID).updateChildValues(["team":teamNewID])
+            let newMember = ["email" :myUser.userEmail,
+                             "firstname" : myUser.userFirstName,
+                             "lastname" : myUser.userLastName,
+                             "city" : myUser.userCity,
+                             "profilepicURL" : myUser.imageURL,
+                             "uid" : myUser.userID,
+                             "position":myUser.position,
+                             "birth":myUser.birth,
+                             "country":myUser.birth,
+                             "phone":myUser.phone,
+                             "team":teamNewID]
+            Database.database().reference().child("Teams").child(teamNewID).child("Members").child(myUser.userID).setValue(newMember) { (err, ref) in
                 if err == nil {
                     self.performSegue(withIdentifier: "created", sender: self.myUser)
                 } else {

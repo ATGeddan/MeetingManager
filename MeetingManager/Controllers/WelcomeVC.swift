@@ -36,34 +36,51 @@ class WelcomeVC: UIViewController {
     }
 
     @IBAction func joinPressed(_ sender: Any) {
-    Database.database().reference().child("teamRef").observeSingleEvent(of: .value) { (snap) in
-    if let children = snap.children.allObjects as? [DataSnapshot] {
-    if children.count > 0 {
-    for snapshot in children {
-    if let dict = snapshot.value as? [String:AnyObject] {
-    let team = Team(data: dict)
-    if team.name.lowercased() == self.teamName.text! || team.name == self.teamName.text! || team.name.capitalized == self.teamName.text! {
-    if team.pass == self.teamPass.text! { // Correct info given
-    self.myUser.teamID = team.id
-    Database.database().reference().child("Users").child(self.myUser.userID).updateChildValues(["team":team.id])
-    let newMember = ["email" :self.myUser.userEmail,"firstname" : self.myUser.userFirstName,"lastname" : self.myUser.userLastName,"city" : self.myUser.userCity,"profilepicURL" : self.myUser.imageURL,"uid" : self.myUser.userID,"position":self.myUser.position,"birth":self.myUser.birth,"country":self.myUser.birth,"phone":self.myUser.phone,"team":team.id]
-    Database.database().reference().child("Teams").child(team.id).child("Members").child(self.myUser.userID).setValue(newMember, withCompletionBlock: { (err, ref) in
-    self.performSegue(withIdentifier: "joined", sender: self.myUser)
-    })
-    } else { // Wrong name or Pass
-        let alert = UIAlertController(title: "Incorrect", message: "Team name or password is incorrect", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Got it", style: .default, handler: nil))
-        self.present(alert,animated: true,completion: nil)
-    }
-    }
-    }
-    }
-    }
-    }
-    }
+        let myUserRef = Database.database().reference().child("Users").child(self.myUser.userID)
+        Database.database().reference().child("teamRef").observeSingleEvent(of: .value) { (snap) in
+            if let children = snap.children.allObjects as? [DataSnapshot] {
+                if children.count > 0 {
+                    for snapshot in children {
+                        if let dict = snapshot.value as? [String:AnyObject] {
+                            let team = Team(data: dict)
+                            if team.name.lowercased() == self.teamName.text! || team.name == self.teamName.text! || team.name.capitalized == self.teamName.text! {
+                                if team.pass == self.teamPass.text! { // Correct info given
+                                    self.myUser.teamID = team.id
+                                    myUserRef.updateChildValues(["team":team.id])
+                                    let newMember = ["email" :self.myUser.userEmail,
+                                                     "firstname" : self.myUser.userFirstName,
+                                                     "lastname" : self.myUser.userLastName,
+                                                     "city" : self.myUser.userCity,
+                                                     "profilepicURL" : self.myUser.imageURL,
+                                                     "uid" : self.myUser.userID,
+                                                     "position":self.myUser.position,
+                                                     "birth":self.myUser.birth,
+                                                     "country":self.myUser.birth,
+                                                     "phone":self.myUser.phone,
+                                                     "team":team.id]
+                                    Database.database().reference().child("Teams").child(team.id).child("Members").child(self.myUser.userID).setValue(newMember, withCompletionBlock: { (err, ref) in
+                                        self.performSegue(withIdentifier: "joined", sender: self.myUser)
+                                    })
+                                } else { // Wrong Pass
+                                    let alert = UIAlertController(title: "Incorrect", message: "Team password is incorrect", preferredStyle: .alert)
+                                    alert.addAction(UIAlertAction(title: "Got it", style: .default, handler: nil))
+                                    self.present(alert,animated: true,completion: nil)
+                                }
+                            } else {
+                                let alert = UIAlertController(title: "Incorrect", message: "Team name is incorrect", preferredStyle: .alert)
+                                alert.addAction(UIAlertAction(title: "Got it", style: .default, handler: nil))
+                                self.present(alert,animated: true,completion: nil)
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        teamName.text = ""
+        teamPass.text = ""
         if let destination = segue.destination as? CreateTeamVC {
             if let user = sender as? User {
                 destination.myUser = user

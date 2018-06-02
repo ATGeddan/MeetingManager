@@ -50,12 +50,26 @@ class MeetingAddVC: UIViewController {
     
     @objc func donePressed() {
         SVProgressHUD.show()
-        let timeStamp = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-        let newDict = ["date": dateField.text!, "place": placeField.text!, "city": cityField.text!, "notes": notesText.text!, "ID":"f\(timeStamp)","teamID":myUser.teamID,"adminID":myUser.userID,"teamAdmin":myTeam.adminID]
+        let meetingNewID = Database.database().reference().child("Teams").child(myUser.teamID).child("Meetings").childByAutoId().key
+        let newDict = ["date": dateField.text!,
+                       "place": placeField.text!,
+                       "city": cityField.text!,
+                       "notes": notesText.text!,
+                       "ID":meetingNewID,
+                       "teamID":myUser.teamID,
+                       "adminID":myUser.userID,
+                       "teamAdmin":myTeam.adminID]
         let newMeeting = MeetingModel(data: newDict as Dictionary<String, AnyObject>)
         // Upload Data to server
         let databaseRef = Database.database().reference().child("Teams").child(myUser.teamID).child("Meetings").child(newMeeting.meetingID)
-        let dictionary :[String:String] = ["date":newMeeting.meetingDate,"place":newMeeting.meetingPlace,"city":newMeeting.meetingCity,"notes":newMeeting.meetingNotes,"ID":newMeeting.meetingID,"teamID":newMeeting.teamID,"adminID":myUser.userID,"teamAdmin":myTeam.adminID]
+        let dictionary :[String:String] = ["date":newMeeting.meetingDate,
+                                           "place":newMeeting.meetingPlace,
+                                           "city":newMeeting.meetingCity,
+                                           "notes":newMeeting.meetingNotes,
+                                           "ID":newMeeting.meetingID,
+                                           "teamID":newMeeting.teamID,
+                                           "adminID":myUser.userID,
+                                           "teamAdmin":myTeam.adminID]
         databaseRef.setValue(dictionary) { (error, ref) in
             if error != nil {
                 print(error!)

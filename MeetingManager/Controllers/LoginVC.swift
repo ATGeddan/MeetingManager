@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import SVProgressHUD
 
 class LoginVC: UIViewController {
     @IBOutlet weak var signViewLeading: NSLayoutConstraint!
@@ -26,6 +27,7 @@ class LoginVC: UIViewController {
     }
 
     @IBAction func loginPressed(_ sender: Any) {
+        SVProgressHUD.show()
         Auth.auth().signIn(withEmail: emailField.text!, password: passField.text!) { (user, error) in
             if error != nil {
                 print(error!)
@@ -37,6 +39,7 @@ class LoginVC: UIViewController {
                 Database.database().reference().child("Users").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
                     if let dictionary = snapshot.value as? [String:AnyObject] {
                         let myUser1 = User(data: dictionary)
+                        SVProgressHUD.dismiss()
                         if myUser1.teamID == nil || myUser1.teamID == "" {
                             self.performSegue(withIdentifier: "toWelcome", sender: myUser1)
                         } else {
@@ -52,6 +55,7 @@ class LoginVC: UIViewController {
     
     func checkAuth() {
         if Auth.auth().currentUser?.uid != nil {
+            SVProgressHUD.show()
             perform(#selector(handleSignIn))
         }
     }
@@ -60,6 +64,7 @@ class LoginVC: UIViewController {
         Database.database().reference().child("Users").child(uid!).observeSingleEvent(of: .value, with: { (snapshot) in
             if let dictionary = snapshot.value as? [String:AnyObject] {
                 let myUser1 = User(data: dictionary)
+                SVProgressHUD.dismiss()
                 if myUser1.teamID == nil || myUser1.teamID == "" {
                     self.performSegue(withIdentifier: "toWelcome", sender: myUser1)
                 } else {

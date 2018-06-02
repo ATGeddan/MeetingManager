@@ -27,9 +27,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     @IBOutlet weak var infoView: UIView!
     @IBOutlet weak var postitionEdit: UITextField!
     @IBOutlet weak var profPosition: UILabel!
-    @IBOutlet weak var nameEdit2: UITextField!
     @IBOutlet weak var cityEdit: UITextField!
-    @IBOutlet weak var nameEdit: UITextField!
     @IBOutlet weak var profImage: UIImageView!
     @IBOutlet weak var profName: UILabel!
     @IBOutlet weak var profCity: UILabel!
@@ -103,8 +101,6 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         self.phoneLabel.text = self.myUser.phone
         self.emailLabel.text = self.myUser.userEmail
         self.birthLabel.text = self.myUser.birth
-        self.nameEdit.text = self.myUser.userFirstName
-        self.nameEdit2.text = self.myUser.userLastName
         self.profCity.text = self.myUser.userCity
         self.profImage.kf.setImage(with: image)
         self.profName.text = myUser.userFirstName + " " + myUser.userLastName
@@ -212,9 +208,9 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         SVProgressHUD.show()
         if let chosenImage = info[UIImagePickerControllerEditedImage] as? UIImage {
             let imageData = UIImageJPEGRepresentation(chosenImage, 0.1)
-            Storage.storage().reference().child("profilePhoto").putData(imageData!).observe(.success) { (snapshot) in
+            Storage.storage().reference().child("profilePhoto").child(myUser.userID).putData(imageData!).observe(.success) { (snapshot) in
                 // When the image has successfully uploaded, we get it's download URL
-                Storage.storage().reference().child("profilePhoto").downloadURL(completion: { (url, error) in
+                Storage.storage().reference().child("profilePhoto").child(self.myUser.userID).downloadURL(completion: { (url, error) in
                     if let urlText = url?.absoluteString {
                         let dict = ["profilepicURL" : urlText]
                         Database.database().reference().child("Users").child(self.myUser.userID).updateChildValues(dict)
@@ -238,7 +234,6 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             countryEdit.text = contryLabel.text
             birthEdit.text = birthLabel.text
             birthLabel.isHidden = true
-            profName.isHidden = true
             profCity.isHidden = true
             profPosition.isHidden = true
             phoneLabel.isHidden = true
@@ -249,25 +244,23 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             birthEdit.isHidden = false
             countryEdit.isHidden = false
             postitionEdit.isHidden = false
-            nameEdit.isHidden = false
             cityEdit.isHidden = false
-            nameEdit2.isHidden = false
         } else {
             editingProfile = false
-            let dict = ["firstname" : nameEdit.text!,"lastname" : nameEdit2.text!,"city" : cityEdit.text!,"position" : postitionEdit.text!,"phone" : phoneEdit.text!,"country": countryEdit.text!,"birth":birthEdit.text!,"profilepicURL":myUser.imageURL]
+            let dict = ["city" : cityEdit.text!,
+                        "position" : postitionEdit.text!,
+                        "phone" : phoneEdit.text!,
+                        "country": countryEdit.text!,
+                        "birth":birthEdit.text!,
+                        "profilepicURL":myUser.imageURL]
             Database.database().reference().child("Users").child(myUser.userID).updateChildValues(dict)
             Database.database().reference().child("Teams").child(myUser.teamID).child("Members").child(myUser.userID).updateChildValues(dict)
-            if myUser.userID == myTeam.adminID {
-                Database.database().reference().child("Teams").child(myUser.teamID).child("teaminfo").updateChildValues(["adminName":nameEdit.text! + " " + nameEdit2.text!])
-            }
             profCity.text = cityEdit.text
-            profName.text = nameEdit.text! + " " + nameEdit2.text!
             profPosition.text = postitionEdit.text
             phoneLabel.text = phoneEdit.text
             contryLabel.text = countryEdit.text
             birthLabel.text = birthEdit.text
             birthLabel.isHidden = false
-            profName.isHidden = false
             profCity.isHidden = false
             profPosition.isHidden = false
             phoneLabel.isHidden = false
@@ -278,9 +271,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             phoneEdit.isHidden = true
             countryEdit.isHidden = true
             postitionEdit.isHidden = true
-            nameEdit.isHidden = true
             cityEdit.isHidden = true
-            nameEdit2.isHidden = true
         }
     }
 

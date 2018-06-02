@@ -9,6 +9,7 @@
 import UIKit
 import Firebase
 import Kingfisher
+import SVProgressHUD
 
 class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     @IBOutlet weak var passBG: UIImageView!
@@ -141,10 +142,20 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         Database.database().reference().child("Users").child(myUser.userID).observe(.value) { (snapshot) in
             if let dicts = snapshot.value as? [String:AnyObject] {
                 self.myUser.updateUser(data: dicts)
+                if self.myUser.teamID != "" && self.myUser.teamID != nil {
                 let image = URL(string: self.myUser.imageURL)
-                self.sideImage.kf.setImage(with: image)
-                self.sideName.text = self.myUser.userFirstName + " " + self.myUser.userLastName
-                self.sideEmail.text = self.myUser.userEmail
+                    self.sideImage.kf.setImage(with: image)
+                    self.sideName.text = self.myUser.userFirstName + " " + self.myUser.userLastName
+                    self.sideEmail.text = self.myUser.userEmail
+                } else {
+                    Database.database().reference().removeAllObservers()
+                    let alert = UIAlertController(title: "Kicked", message: "You have been kicked from this team", preferredStyle: UIAlertControllerStyle.alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .destructive, handler: { (action) in
+                        self.myUser.teamID = ""
+                        self.dismiss(animated: true, completion: nil)
+                    }))
+                    self.present(alert, animated: true, completion: nil)
+                }
             }
         }
     }
@@ -229,6 +240,9 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
                 Database.database().reference().child("Teams").child(self.myUser.teamID).child("teaminfo").updateChildValues(["password":newPass])
                 Database.database().reference().child("teamRef").child(self.myUser.teamID).updateChildValues(["password":newPass])
                 self.openClosePass()
+                self.newPassField.text = ""
+                self.confirmField.text = ""
+                self.oldPassField.text = ""
             } else {
                 let alert = UIAlertController(title: "Confirm new password", message: "Your new password and confirm password do not match", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -278,7 +292,9 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     }
     
     func deleteTriggered() {
-        Database.database().reference().child("Teams").child(myUser.teamID).child("Members").observeSingleEvent(of: .value) { (snap) in
+        SVProgressHUD.show()
+        let teamid = myUser.teamID
+        Database.database().reference().child("Teams").child(teamid!).child("Members").observeSingleEvent(of: .value) { (snap) in
             if let users = snap.children.allObjects as? [DataSnapshot] {
                 for x in 0..<users.count {
                     if let userDict = users[x].value as? [String:AnyObject] {
@@ -288,12 +304,27 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
                 }
             }
         }
-        Storage.storage().reference().child("Teams").child(myUser.teamID).delete { (err) in}
-        Database.database().reference().child("Teams").child(myUser.teamID).removeValue()
-        Database.database().reference().child("teamRef").child(myUser.teamID).removeValue()
-        self.performSegue(withIdentifier: "backWelcome", sender: myUser)
+        Database.database().reference().child("Teams").child(teamid!).child("photosRef").observeSingleEvent(of: .value) { (snap) in
+            if let photos = snap.children.allObjects as? [DataSnapshot] {
+                for x in 0..<photos.count {
+                    if let photosDict = photos[x].value as? [String:AnyObject] {
+                        if let photoID = photosDict["id"] as? String {
+                            Storage.storage().reference().child("Teams").child(teamid!).child("meetingPhotos").child(photoID).delete(completion: { (error) in
+                                if error != nil {
+                                    print(error!)
+                                }
+                            })
+                        }
+                    }
+                }
+            }
+        }
+        Database.database().reference().child("teamRef").child(teamid!).removeValue()
+        Database.database().reference().child("Teams").child(teamid!).child("Meetings").removeValue()
+        Database.database().reference().child("Teams").child(teamid!).child("UserTasks").removeValue()
+        SVProgressHUD.dismiss()
+        self.performSegue(withIdentifier: "backWelcome", sender: self.myUser)
     }
-    
     
     // MARK: Leaving Team
     
@@ -315,8 +346,6 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
                 self.performSegue(withIdentifier: "backWelcome", sender: self.myUser)
             }
         }
-        
-        
     }
     
     // MARK: Logging out & Side menu
@@ -398,9 +427,6 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         if viewTop.constant != 32 {
             self.openClosePass()
         }
-        if editingTeam == true {
-            self.editTeam(self)
-        }
         menuLeading.constant = -222
         tableView.alpha = 1
         teamView.alpha = 1
@@ -410,6 +436,10 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         if let destination = segue.destination as? MeetingVC {
             if let model = sender as? MeetingModel {
                 destination.currentMeeting = model
+                destination.myUser = myUser
+                if editingTeam == true {
+                    self.editTeam(self)
+                }
             }
         }
         if let des = segue.destination as? ProfileVC {
@@ -417,12 +447,18 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
                 des.myUser = user
             }
             des.myTeam = team
+            if editingTeam == true {
+                self.editTeam(self)
+            }
         }
         if let dest = segue.destination as? MeetingAddVC {
             if let user = sender as? User {
                 dest.myUser = user
             }
             dest.myTeam = team
+            if editingTeam == true {
+                self.editTeam(self)
+            }
         }
         if let dest2 = segue.destination as? WelcomeVC {
             if let user = sender as? User {
@@ -434,6 +470,9 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
                 dest3.myUser = user
             }
             dest3.myTeam = team
+            if editingTeam == true {
+                self.editTeam(self)
+            }
         }
     }
     

@@ -35,6 +35,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     var segmentedControl2 = XMSegmentedControl()
     var meetingRef = DatabaseReference()
     @IBOutlet weak var deleteButton: UIButton!
+    var myUser = User()
     
     
 
@@ -43,16 +44,14 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         meetingRef = Database.database().reference().child("Teams").child(currentMeeting.teamID)
         imagePicker = UIImagePickerController()
         imagePicker.delegate = self
-        commentField.delegate = self
-        photosView.addGestureRecognizer(imageScrollView.panGestureRecognizer)
         recieveMeetingInfo()
         addSegmentedController()
         getPhotos()
-        setupImageTapAndAdmin()
-        retrieveComments()
+        setupTapAndAdmin()
+        updateComments()
         createDatePicker()
         getUsers()
-        retrieveTasks()
+        updateTasks()
     }
     
     @IBAction func homeClicked(_ sender: Any) {
@@ -108,20 +107,25 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     
 
     
-    func setupImageTapAndAdmin() {
+    func setupTapAndAdmin() {
         navigationItem.hidesBackButton = true
         navigationItem.leftBarButtonItem = UIBarButtonItem(image: UIImage(named: "home-512"), style: .plain, target: self, action: #selector(homeClicked(_:)))
-        if Auth.auth().currentUser?.uid == currentMeeting.meetingAdmin || Auth.auth().currentUser?.uid == currentMeeting.teamAdmin {
+        if myUser.userID == currentMeeting.meetingAdmin || myUser.userID == currentMeeting.teamAdmin {
             navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "pen_paper_2-512"), style: .plain, target: self, action: #selector(ediTClicked(_:)))
             addTaskButton.isHidden = false
         }
+        commentField.delegate = self
         let tapGesture1 = UITapGestureRecognizer(target: self, action: #selector(tableViewTapped))
         commentstableView.addGestureRecognizer(tapGesture1)
         // some extra view did load preps
         commentsView.alpha = 0
         tasksView.alpha = 0
         ComposeView.addShadow(location: .top, color: UIColor.black, opacity: 0.5, radius: 3.0)
-        
+        photosView.addGestureRecognizer(imageScrollView.panGestureRecognizer)
+        commentstableView.rowHeight = UITableViewAutomaticDimension
+        commentstableView.estimatedRowHeight = 77
+        taskTableView.rowHeight = UITableViewAutomaticDimension
+        taskTableView.estimatedRowHeight = 70
     }
     
     @objc func tableViewTapped() {
@@ -198,10 +202,12 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
      func deleteMeeting() {
-        Storage.storage().reference().child("Teams").child(currentMeeting.teamID).child("meetingPhotos").child(currentMeeting.meetingID).delete { (err) in
-            if err != nil {
-                print(err!)
+        for i in 0..<allImages.count {
+        Storage.storage().reference().child("Teams").child(currentMeeting.teamID).child("meetingPhotos").child(currentMeeting.meetingID).child(allImages[i].ID).delete { (error) in
+            if error != nil {
+                print(error!)
             }
+        }
         }
         meetingRef.child("Meetings").child(currentMeeting.meetingID).removeValue()
         meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).removeValue()
@@ -297,7 +303,8 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     func deleteTriggered(id:String) {
 
         meetingRef.child("MeetingPhotos").child(currentMeeting.meetingID).child(id).removeValue()
-        Storage.storage().reference().child("Teams").child(currentMeeting.teamID).child("meetingPhotos").child(currentMeeting.meetingID).child(id).delete { (err) in
+        meetingRef.child("photosRef").child(id).removeValue()
+        Storage.storage().reference().child("Teams").child(currentMeeting.teamID).child("meetingPhotos").child(id).delete { (err) in
             if err != nil {
                 print(err!)
             }
@@ -321,34 +328,22 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         }
     }
     
-
-    @IBAction func imageClicked(_ sender: UIButton) {
-        let photos = PHPhotoLibrary.authorizationStatus()
-        if photos == .notDetermined {
-            PHPhotoLibrary.requestAuthorization({status in
-                if status == .authorized{
-                    self.present(self.imagePicker, animated: true, completion: nil)
-                } else {}
-            })
-        } else if photos == .authorized {
-            self.present(self.imagePicker, animated: true, completion: nil)
-        }
-    }
     
     @objc func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         SVProgressHUD.show()
-        let imageID = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-        let storageRef = Storage.storage().reference().child("Teams").child(currentMeeting.teamID).child("meetingPhotos").child(currentMeeting.meetingID).child("d\(imageID)")
-        let meetingRef2 = meetingRef.child("MeetingPhotos").child(currentMeeting.meetingID).child("d\(imageID)")
+        let imageID = meetingRef.child("MeetingPhotos").child(currentMeeting.meetingID).childByAutoId().key
+        let storageRef = Storage.storage().reference().child("Teams").child(currentMeeting.teamID).child("meetingPhotos").child(imageID)
+        let meetingRef2 = meetingRef.child("MeetingPhotos").child(currentMeeting.meetingID).child(imageID)
         if let chosenImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
-            guard let imageData = UIImageJPEGRepresentation(chosenImage, 0.4) else {return}
+            guard let imageData = UIImageJPEGRepresentation(chosenImage, 0.3) else {return}
             storageRef.putData(imageData).observe(.success) { (snapshot) in
                 // When the image has successfully uploaded, we get its download URL
                 storageRef.downloadURL(completion: { (url, error) in
                     if let urlText = url?.absoluteString {
-                        let dict = ["url" : urlText,"ID" : "d\(imageID)"]
+                        let dict = ["url" : urlText,"ID" : imageID]
                         meetingRef2.updateChildValues(dict)
                         SVProgressHUD.dismiss()
+                        self.meetingRef.child("photosRef").child(imageID).setValue(["id":imageID])
                         
                     }
                 })
@@ -375,18 +370,14 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         var count: Int!
         if tableView.tag == 1 {
             if comments.count == 0 {
-                count = 0
+                count = comments.count
                 self.commentPlaceholder.isHidden = false
             } else {
                 count = comments.count
                 self.commentPlaceholder.isHidden = true
             }
         } else if tableView.tag == 2 {
-            if tasks.count == 0 {
-                count = 1
-            } else {
-                count = tasks.count
-            }
+            count = tasks.count
         } else if tableView.tag == 3 {
             count = users.count
         }
@@ -398,25 +389,26 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         var cell:commentCell!
         if tableView.tag == 1 {
                 cell = tableView.dequeueReusableCell(withIdentifier: "commentCell", for: indexPath) as! commentCell
-                cell.commentThumb.imageUsingCacheFromServerURL(urlString: comments[indexPath.row].imageURL)
-                cell.commentThumb.layer.cornerRadius = 30
+            if comments.count > 0 {
+                let thisComment = comments[indexPath.row]
+                cell.commentThumb.imageUsingCacheFromServerURL(urlString: thisComment.imageURL)
+                cell.commentThumb.layer.cornerRadius = 24.5
                 cell.commentThumb.layer.borderWidth = 1
                 cell.commentThumb.layer.borderColor = UIColor.lightGray.cgColor
-            let myID = Auth.auth().currentUser?.uid
+                cell.commentName.text = thisComment.name
+                cell.commentTime.text = thisComment.time
+                cell.commentBody.text = thisComment.body
+            let myID = myUser.userID
             if myID == currentMeeting.meetingAdmin || myID == currentMeeting.teamAdmin || myID == comments[indexPath.row].userID {
                 cell.deleteBtn.tag = indexPath.row
                 cell.deleteBtn.isHidden = false
             }
-                cell.commentName.text = comments[indexPath.row].name
-                cell.commentTime.text = comments[indexPath.row].time
-                cell.commentBody.text = comments[indexPath.row].body
+            }
         } else if tableView.tag == 2 {
-            if tasks.count == 0 {
-                cell = tableView.dequeueReusableCell(withIdentifier: "taskCell", for: indexPath) as! commentCell
-            } else {
                 cell = taskTableView.dequeueReusableCell(withIdentifier: "taskCell", for: indexPath) as! commentCell
+            if tasks.count > 0 {
                 cell.taskBody.text = tasks[indexPath.row].task
-                let myID = Auth.auth().currentUser?.uid
+                let myID = myUser.userID
                 if myID == currentMeeting.meetingAdmin || myID == currentMeeting.teamAdmin {
                     cell.deleteTaskBtn.tag = indexPath.row
                     cell.deleteTaskBtn.isHidden = false
@@ -430,20 +422,6 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         }
         return cell
     }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        var high:CGFloat!
-        if tableView.tag == 1 {
-            high = 77.0
-        } else if tableView.tag == 2 {
-            high = 49.0
-        } else if tableView.tag == 3 {
-            high = 30.0
-        }
-        return high
-    }
-    
-
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if tableView.tag == 3 {
@@ -483,10 +461,15 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             commentField.isEnabled = false
             sendButton.isEnabled = false
             let timestamp = DateFormatter.localizedString(from: NSDate() as Date, dateStyle: .medium, timeStyle: .short)
-            let timeID = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-            let uid = Auth.auth().currentUser?.uid
-            let commentDict = ["uid":uid,"time":timestamp,"body":commentField.text!, "ID": "c\(timeID)"]
-            meetingRef.child("Comments").child(currentMeeting.meetingID).child("c\(timeID)").setValue(commentDict) { (error, ref) in
+            let uid = myUser.userID
+            let autoID = Int(NSDate.timeIntervalSinceReferenceDate*1000)
+            let commentDict = ["uid":uid,
+                               "time":timestamp,
+                               "body":commentField.text!,
+                               "ID": "\(autoID)",
+                               "name": myUser.userFirstName + " " + myUser.userLastName,
+                               "imageURL": myUser.imageURL]
+            meetingRef.child("Comments").child(currentMeeting.meetingID).child("\(autoID)").setValue(commentDict) { (error, ref) in
             if error != nil {
                 print(error!)
             } else {
@@ -499,20 +482,30 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
     func retrieveComments() {
-        meetingRef.child("Comments").child(currentMeeting.meetingID).observe(.childAdded) { (snapshot) in
-            if let dicto = snapshot.value as? [String:AnyObject] {
-                if let time = dicto["time"] as? String,let body = dicto["body"] as? String,let UserID = dicto["uid"] as? String,let comID = dicto["ID"] as? String {
-                    Database.database().reference().child("Users").child(UserID).observeSingleEvent(of: .value, with: { (snap) in
-                        if let dictionary2 = snap.value as? [String:AnyObject] {
-                            let commenter = User(data: dictionary2)
-                            let name = commenter.userFirstName + " " + commenter.userLastName
-                            let comment = Comment(name:name,time:time,body:body,url:commenter.imageURL, id: comID,userID:UserID)
-                            self.comments.insert(comment, at: 0)
-                            self.commentstableView.reloadData()
-                        }
-                    })
+        meetingRef.child("Comments").child(currentMeeting.meetingID).queryOrderedByKey().observeSingleEvent(of: .value) { (snapshot) in
+            self.comments = []
+            if let children = snapshot.children.allObjects as? [DataSnapshot] {
+                for child in children {
+                    if let dicto = child.value as? [String:AnyObject] {
+                        let comment = Comment(data: dicto)
+                        self.comments.insert(comment, at: 0)
+                        self.commentstableView.reloadData()
+                    }
                 }
             }
+        }
+    }
+    
+    func updateComments() {
+        meetingRef.child("Comments").child(currentMeeting.meetingID).queryOrderedByKey().observe(.childRemoved) { (snap) in
+            self.comments = []
+            self.retrieveComments()
+            self.commentstableView.reloadData()
+        }
+        meetingRef.child("Comments").child(currentMeeting.meetingID).queryOrderedByKey().observe(.childAdded) { (snap) in
+            self.comments = []
+            self.retrieveComments()
+            self.commentstableView.reloadData()
         }
     }
     
@@ -528,7 +521,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     func deleteCommentTriggered(sender:UIButton) {
         meetingRef.child("Comments").child(currentMeeting.meetingID).child(comments[sender.tag].ID).removeValue { (error, ref) in
             if error == nil {
-                self.comments.remove(at: sender.tag)
+//                self.comments.remove(at: sender.tag)
                 self.commentstableView.reloadData()
             }
         }
@@ -575,12 +568,12 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                     self.view.layoutIfNeeded()
                 }
                 let timestamp = DateFormatter.localizedString(from: NSDate() as Date, dateStyle: .medium, timeStyle: .none)
-                let newID = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-                let databaseREF2 = meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).child("e\(newID)")
-                let taskDict = ["task":self.taskField.text!,"done":false,"ID":"e\(newID)","date":timestamp] as [String : Any]
+                let newID = meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).childByAutoId().key
+                let databaseREF2 = meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).child(newID)
+                let taskDict = ["task":self.taskField.text!,"done":false,"ID":newID,"date":timestamp] as [String : Any]
                 databaseREF2.setValue(taskDict)
                 for x in 0...chosenUsers.count - 1 {
-                    let databaseREF = meetingRef.child("UserTasks").child(chosenUsers[x]).child("e\(newID)")
+                    let databaseREF = meetingRef.child("UserTasks").child(chosenUsers[x]).child(newID)
                     databaseREF.setValue(taskDict) { (error, ref) in
                     if error != nil {
                         print(error!)
@@ -602,13 +595,30 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
     func retrieveTasks() {
-        meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).observe(.childAdded) { (snapshot) in
-            
-            if let dicto2 = snapshot.value as? [String:AnyObject] {
-                let task = Task(data: dicto2)
-                self.tasks.append(task)
-                self.taskTableView.reloadData()
+        meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).observeSingleEvent(of: .value) { (snapshot) in
+            self.tasks = []
+            if let children = snapshot.children.allObjects as? [DataSnapshot] {
+                for child in children {
+                    if let dicto2 = child.value as? [String:AnyObject] {
+                        let task = Task(data: dicto2)
+                        self.tasks.append(task)
+                        self.taskTableView.reloadData()
+                    }
+                }
             }
+        }
+    }
+    
+    func updateTasks() {
+        meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).observe(.childRemoved) { (snapshot) in
+            self.tasks = []
+            self.taskTableView.reloadData()
+            self.taskTableView.reloadData()
+        }
+        meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).observe(.childAdded) { (snapshot) in
+            self.tasks = []
+            self.taskTableView.reloadData()
+            self.taskTableView.reloadData()
         }
     }
     
@@ -624,7 +634,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     func deleteTaskTriggered(sender: UIButton) {
         meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).child(tasks[sender.tag].ID).removeValue { (error, ref) in
             if error == nil {
-                self.tasks.remove(at: sender.tag)
+//                self.tasks.remove(at: sender.tag)
                 self.taskTableView.reloadData()
             }
         }

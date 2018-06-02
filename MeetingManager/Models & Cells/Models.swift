@@ -319,13 +319,25 @@ class Comment {
         return _userID
     }
     
-    init(name:String,time:String,body:String,url:String,id:String,userID:String) {
-        _name = name
-        _body = body
-        _time = time
-        _imageURL = url
-        _ID = id
-        _userID = userID
+    init(data:Dictionary<String,AnyObject>) {
+        if let imageURL = data["imageURL"] as? String {
+            _imageURL = imageURL
+        }
+        if let name = data["name"] as? String {
+            _name = name
+        }
+        if let time = data["time"] as? String {
+            _time = time
+        }
+        if let body = data["body"] as? String {
+            _body = body
+        }
+        if let ID = data["ID"] as? String {
+            _ID = ID
+        }
+        if let userID = data["uid"] as? String {
+            _userID = userID
+        }
     }
 }
 // ------------------------------------------
