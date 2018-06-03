@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import SVProgressHUD
 
 class RegisterVC: UIViewController,UITextFieldDelegate {
     @IBOutlet weak var correct: UIImageView!
@@ -50,6 +51,7 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
     @IBAction func registerPressed(_ sender: Any) {
         guard let email = emailField.text ,let password = passField.text else { return }
         if passField.text == confirmField.text && firstField.text?.isEmpty == false && lastField.text?.isEmpty == false {
+            SVProgressHUD.show()
             Auth.auth().createUser(withEmail: email, password: password) { (user, error) in
                 if error != nil {
                     if let errCode = AuthErrorCode(rawValue: error!._code) {
@@ -77,6 +79,7 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
                     }
                 } else {
                     self.createProfile()
+                    SVProgressHUD.dismiss()
                     self.performSegue(withIdentifier: "registered", sender: self.myUser)
                 }
             }

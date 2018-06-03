@@ -111,10 +111,10 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
         infoView.alpha = 0
         segmentedControl3 = XMSegmentedControl(frame: CGRect(x: 0, y: 375, width: self.view.frame.width, height: 44), segmentTitle: ["Tasks", "Info"], selectedItemHighlightStyle: XMSelectedItemHighlightStyle.bottomEdge)
         segmentedControl3.delegate = self
-        segmentedControl3.backgroundColor = UIColor(red: 45/255, green: 44/255, blue: 46/255, alpha: 1)
-        segmentedControl3.highlightColor = UIColor(red: 187/255, green: 195/255, blue: 201/255, alpha: 1)
-        segmentedControl3.tint = UIColor(red: 156/255, green: 156/255, blue: 156/255, alpha: 0.7)
-        segmentedControl3.highlightTint = UIColor(red: 187/255, green: 195/255, blue: 201/255, alpha: 1)
+        segmentedControl3.backgroundColor = UIColor(red: 48/255, green: 68/255, blue: 107/255, alpha: 1)
+        segmentedControl3.highlightColor = UIColor(red: 192/255, green: 192/255, blue: 192/255, alpha: 1)
+        segmentedControl3.tint = UIColor(red: 220/255, green: 220/255, blue: 220/255, alpha: 0.7)
+        segmentedControl3.highlightTint = UIColor(red: 200/255, green: 200/255, blue: 200/255, alpha: 1)
         segmentedControl3.addShadow(location: .top, color: UIColor.black, opacity: 0.5, radius: 3.0)
         
         self.view.addSubview(segmentedControl3)

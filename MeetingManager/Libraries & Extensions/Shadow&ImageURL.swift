@@ -62,3 +62,10 @@ extension UIImageView {
             
         }).resume()
     }}
+
+extension UIImageView {
+    override open func awakeFromNib() {
+        super.awakeFromNib()
+        self.tintColorDidChange()
+    }
+}

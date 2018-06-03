@@ -48,12 +48,6 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         checkForUpdates()
         getTeamData()
         getPersonalInfo()
-        self.changeLabel.alpha = 0
-        self.confirmBtn.alpha = 0
-        self.passBG.alpha = 0
-        self.oldPassField.alpha = 0
-        self.newPassField.alpha = 0
-        self.confirmField.alpha = 0
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
@@ -259,23 +253,11 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         if viewTop.constant == 32 {
             UIView.animate(withDuration: 0.3) {
                 self.viewTop.constant = 208
-                self.changeLabel.alpha = 1
-                self.confirmBtn.alpha = 1
-                self.oldPassField.alpha = 1
-                self.newPassField.alpha = 1
-                self.confirmField.alpha = 1
-                self.passBG.alpha = 1
                 self.view.layoutIfNeeded()
             }
         } else {
             UIView.animate(withDuration: 0.3) {
                 self.viewTop.constant = 32
-                self.changeLabel.alpha = 0
-                self.confirmBtn.alpha = 0
-                self.passBG.alpha = 0
-                self.oldPassField.alpha = 0
-                self.newPassField.alpha = 0
-                self.confirmField.alpha = 0
                 self.view.layoutIfNeeded()
             }
         }
@@ -372,16 +354,15 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     @IBAction func menuBarPressed(_ sender: Any) {
         
         if self.menuLeading.constant != -12 {
+            if editingTeam == true {
+                self.editTeam(self)
+            }
             UIView.animate(withDuration: 0.4) {
-                self.passView.alpha = 0.5
-                self.teamView.alpha = 0.5
                 self.menuLeading.constant = -12
                 self.view.layoutIfNeeded()
             }
         } else {
             UIView.animate(withDuration: 0.4) {
-                self.passView.alpha = 1
-                self.teamView.alpha = 1
                 self.menuLeading.constant = -222
                 self.view.layoutIfNeeded()
             }
@@ -392,16 +373,16 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         if sender.state == .began || sender.state == .changed {
             let translation = sender.translation(in: self.view).x
             if translation > 20 { // Swipe right
+                if editingTeam == true {
+                    self.editTeam(self)
+                }
                 UIView.animate(withDuration: 0.4) {
-                    self.passView.alpha = 0.5
-                    self.teamView.alpha = 0.5
                     self.menuLeading.constant = -12
+                    
                     self.view.layoutIfNeeded()
                 }
             } else if translation < -20 { // Swipe left
                 UIView.animate(withDuration: 0.4) {
-                    self.passView.alpha = 1
-                    self.teamView.alpha = 1
                     self.menuLeading.constant = -222
                     self.view.layoutIfNeeded()
                 }

@@ -67,10 +67,10 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         let frame = CGRect(x: 0, y: 294, width: self.view.frame.width, height: 44)
         segmentedControl2 = XMSegmentedControl(frame: frame, segmentContent: (titles, icons), selectedItemHighlightStyle: XMSelectedItemHighlightStyle.bottomEdge)
         segmentedControl2.delegate = self
-        segmentedControl2.backgroundColor = UIColor(red: 45/255, green: 45/255, blue: 47/255, alpha: 1)
-        segmentedControl2.highlightColor = UIColor(red: 210/255, green: 210/255, blue: 210/255, alpha: 1)
-        segmentedControl2.tint = UIColor.lightGray
-        segmentedControl2.highlightTint = UIColor(red: 210/255, green: 210/255, blue: 210/255, alpha: 1)
+        segmentedControl2.backgroundColor = UIColor(red: 47/255, green: 69/255, blue: 121/255, alpha: 1)
+        segmentedControl2.highlightColor = UIColor(red: 192/255, green: 192/255, blue: 192/255, alpha: 1)
+        segmentedControl2.tint = UIColor(red: 220/255, green: 220/255, blue: 220/255, alpha: 0.7)
+        segmentedControl2.highlightTint = UIColor(red: 200/255, green: 200/255, blue: 200/255, alpha: 1)
         segmentedControl2.addShadow(location: .top, color: UIColor.black, opacity: 0.5, radius: 3.0)
         self.view.addSubview(segmentedControl2)
     }
@@ -125,7 +125,8 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         commentstableView.rowHeight = UITableViewAutomaticDimension
         commentstableView.estimatedRowHeight = 77
         taskTableView.rowHeight = UITableViewAutomaticDimension
-        taskTableView.estimatedRowHeight = 70
+        taskTableView.estimatedRowHeight = 55
+        taskTableView.addShadow(location: .top, color: UIColor.black, opacity: 0.5, radius: 3.0)
     }
     
     @objc func tableViewTapped() {
@@ -377,7 +378,13 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                 self.commentPlaceholder.isHidden = true
             }
         } else if tableView.tag == 2 {
-            count = tasks.count
+            if tasks.count == 0 {
+                count = tasks.count
+                self.taskPlaceHolder.isHidden = false
+            } else {
+                count = tasks.count
+                self.taskPlaceHolder.isHidden = true
+            }
         } else if tableView.tag == 3 {
             count = users.count
         }
@@ -539,6 +546,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     var users = [User]()
     var chosenUsers = [String]()
     @IBOutlet var ComposeView: UIView!
+    @IBOutlet weak var taskPlaceHolder: UIView!
     
     @IBAction func addClicked(_ sender: UIButton) {
         if addingTask == false { // First it unchecks the old selected users
@@ -612,12 +620,12 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     func updateTasks() {
         meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).observe(.childRemoved) { (snapshot) in
             self.tasks = []
-            self.taskTableView.reloadData()
+            self.retrieveTasks()
             self.taskTableView.reloadData()
         }
         meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).observe(.childAdded) { (snapshot) in
             self.tasks = []
-            self.taskTableView.reloadData()
+            self.retrieveTasks()
             self.taskTableView.reloadData()
         }
     }

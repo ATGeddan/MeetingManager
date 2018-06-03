@@ -8,6 +8,7 @@
 
 import UIKit
 import Firebase
+import SVProgressHUD
 
 class CreateTeamVC: UIViewController,UITextFieldDelegate {
     
@@ -29,6 +30,7 @@ class CreateTeamVC: UIViewController,UITextFieldDelegate {
 
     @IBAction func createPressed(_ sender: Any) {
         if nameField.text != "" && passField.text != "" && nameAvailable == true {
+            SVProgressHUD.show()
             let teamNewID = Database.database().reference().child("Teams").childByAutoId().key
             let teamDict = ["name":nameField.text!,
                             "password":passField.text!,
@@ -56,6 +58,7 @@ class CreateTeamVC: UIViewController,UITextFieldDelegate {
                              "team":teamNewID]
             Database.database().reference().child("Teams").child(teamNewID).child("Members").child(myUser.userID).setValue(newMember) { (err, ref) in
                 if err == nil {
+                    SVProgressHUD.dismiss()
                     self.performSegue(withIdentifier: "created", sender: self.myUser)
                 } else {
                     print(err!)
@@ -98,7 +101,7 @@ class CreateTeamVC: UIViewController,UITextFieldDelegate {
     
     func textFieldDidEndEditing(_ textField: UITextField) {
         for x in 0..<teamNames.count {
-            if nameField.text?.lowercased() == teamNames[x] || nameField.text?.capitalized == teamNames[x] || nameField.text == teamNames[x] {
+            if nameField.text == teamNames[x].lowercased() || nameField.text == teamNames[x].capitalized || nameField.text == teamNames[x] {
                 self.nameAvailable = false
                 self.nameUseLabel.isHidden = false
             }

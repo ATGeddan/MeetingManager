@@ -106,7 +106,7 @@ class LoginVC: UIViewController {
             if err != nil {
                 print(err!)
             } else {
-                let alert = UIAlertController(title: "E-mail sent", message: "A password reset e-mail has been sent to you", preferredStyle: .alert)
+                let alert = UIAlertController(title: "E-mail sent", message: "Please check your inbox", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "Thanks", style: .default, handler: { (action) in
                     self.switchBetween()
                 }))

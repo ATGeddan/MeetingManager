@@ -190,7 +190,7 @@ open class XMSegmentedControl: UIView {
      Sets the font for the text displayed in the segmented control if `contentType` is `Text`
      - Note: Changes only take place if `contentType` is `Text`
      */
-    open var font = UIFont(name: "AvenirNext-DemiBold", size: 13)!
+    open var font = UIFont(name: "AvenirNext-DemiBold", size: 14)!
     
     /// Sets the segmented control selected item highlight style to `Background`, `TopEdge` or `BottomEdge`.
     open var selectedItemHighlightStyle: XMSelectedItemHighlightStyle = .background
