@@ -64,7 +64,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     func addSegmentedController() {
         let titles = ["Photos", "Tasks", "Comments"]
         let icons = [UIImage(named: "icon1")!, UIImage(named: "icon2")!, UIImage(named: "icon3")!]
-        let frame = CGRect(x: 0, y: 294, width: self.view.frame.width, height: 44)
+        let frame = CGRect(x: 0, y: 309, width: self.view.frame.width, height: 44)
         segmentedControl2 = XMSegmentedControl(frame: frame, segmentContent: (titles, icons), selectedItemHighlightStyle: XMSelectedItemHighlightStyle.bottomEdge)
         segmentedControl2.delegate = self
         segmentedControl2.backgroundColor = UIColor(red: 47/255, green: 69/255, blue: 121/255, alpha: 1)
@@ -571,7 +571,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             if taskField.text != "" && chosenUsers != [] {
                 addTaskButton.isEnabled = false
                 UIView.animate(withDuration: 0.25) {
-                    self.taskTableHeight.constant = 290
+                    self.taskTableHeight.constant = 270
                     self.taskField.alpha = 0
                     self.view.layoutIfNeeded()
                 }
@@ -594,7 +594,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                 } else { // if add was clicked to close, not add
                     addingTask = false
                     UIView.animate(withDuration: 0.25) {
-                        self.taskTableHeight.constant = 290
+                        self.taskTableHeight.constant = 270
                         self.taskField.alpha = 0
                         self.view.layoutIfNeeded()
                     }
