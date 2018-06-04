@@ -67,7 +67,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         let frame = CGRect(x: 0, y: 309, width: self.view.frame.width, height: 44)
         segmentedControl2 = XMSegmentedControl(frame: frame, segmentContent: (titles, icons), selectedItemHighlightStyle: XMSelectedItemHighlightStyle.bottomEdge)
         segmentedControl2.delegate = self
-        segmentedControl2.backgroundColor = UIColor(red: 47/255, green: 69/255, blue: 121/255, alpha: 1)
+        segmentedControl2.backgroundColor = UIColor.clear
         segmentedControl2.highlightColor = UIColor(red: 192/255, green: 192/255, blue: 192/255, alpha: 1)
         segmentedControl2.tint = UIColor(red: 220/255, green: 220/255, blue: 220/255, alpha: 0.7)
         segmentedControl2.highlightTint = UIColor(red: 200/255, green: 200/255, blue: 200/255, alpha: 1)
@@ -563,7 +563,6 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             addingTask = true
             UIView.animate(withDuration: 0.25) {
                 self.taskTableHeight.constant = 1
-                self.taskField.alpha = 1
                 self.view.layoutIfNeeded()
             }
             
@@ -572,7 +571,6 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                 addTaskButton.isEnabled = false
                 UIView.animate(withDuration: 0.25) {
                     self.taskTableHeight.constant = 270
-                    self.taskField.alpha = 0
                     self.view.layoutIfNeeded()
                 }
                 let timestamp = DateFormatter.localizedString(from: NSDate() as Date, dateStyle: .medium, timeStyle: .none)
@@ -595,7 +593,6 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                     addingTask = false
                     UIView.animate(withDuration: 0.25) {
                         self.taskTableHeight.constant = 270
-                        self.taskField.alpha = 0
                         self.view.layoutIfNeeded()
                     }
                 }

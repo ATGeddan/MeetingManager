@@ -39,12 +39,14 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
-        if confirmField.text == passField.text {
-            correct.isHidden = false
-            wrong.isHidden = true
-        } else {
-            correct.isHidden = true
-            wrong.isHidden = false
+        if confirmField.text?.isEmpty == false {
+            if confirmField.text == passField.text {
+                correct.isHidden = false
+                wrong.isHidden = true
+            } else {
+                correct.isHidden = true
+                wrong.isHidden = false
+            }
         }
     }
     

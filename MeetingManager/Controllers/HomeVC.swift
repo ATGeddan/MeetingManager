@@ -53,6 +53,8 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         self.navigationController?.navigationBar.isTranslucent = true
         self.navigationController?.view.backgroundColor = UIColor.clear
         sideMenu.layer.cornerRadius = 5
+        sideImage.layer.borderWidth = 1
+        sideImage.layer.borderColor = UIColor.gray.cgColor
         sideMenu.addShadow(location: .right, color: UIColor.black, opacity: 0.8, radius: 3.0)
     }
     override func viewDidAppear(_ animated: Bool) {

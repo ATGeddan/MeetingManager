@@ -34,6 +34,7 @@ class LoginVC: UIViewController {
                 let alert = UIAlertController(title: "Ops", message: "Please make sure your e-mail and password are correct", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "Got it", style: .default, handler: nil))
                 self.present(alert,animated: true,completion: nil)
+                SVProgressHUD.dismiss()
             } else {
                 if let uid = Auth.auth().currentUser?.uid {
                 Database.database().reference().child("Users").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
@@ -76,6 +77,7 @@ class LoginVC: UIViewController {
     
     func switchBetween() {
         if signViewLeading.constant == 0 {
+            emailResetField.isHidden = false
             UIView.animate(withDuration: 0.3) {
                 self.signViewLeading.constant = 375
                 self.resetViewLeading.constant = 0
@@ -83,6 +85,7 @@ class LoginVC: UIViewController {
                 self.view.layoutIfNeeded()
             }
         } else {
+            emailResetField.isHidden = true
             UIView.animate(withDuration: 0.3) {
                 self.signViewLeading.constant = 0
                 self.resetViewLeading.constant = -375
