@@ -14,6 +14,8 @@ import Kingfisher
 
 class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate,UITableViewDelegate,UITableViewDataSource,XMSegmentedControlDelegate {
 
+    @IBOutlet weak var taskPlaceHolder: UIView!
+    @IBOutlet weak var tasksView: UIView!
     @IBOutlet weak var birthEdit: UITextField!
     @IBOutlet weak var photoButton: UIButton!
     @IBOutlet weak var birthLabel: UILabel!
@@ -48,9 +50,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     override func viewDidLoad() {
         super.viewDidLoad()
         self.infoView.alpha = 0
-
         getUserData()
-        retrieveTasks()
         setupSegmentedController()
         imagePicker = UIImagePickerController()
         imagePicker.delegate = self
@@ -63,6 +63,18 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "pen_paper_2-512"), style: .plain, target: self, action: #selector(editPressed(_:)))
 
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(true)
+        Database.database().reference().child("Teams").child(myUser.teamID).child("NewTasks").child(myUser.userID).removeValue()
+        updateTasks()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(true)
+        Database.database().reference().child("Teams").child(myUser.teamID).child("UserTasks").child(myUser.userID).removeAllObservers()
+    }
+    
     
     func setupSegmentedController() {
         segmentedControl3 = XMSegmentedControl(frame: CGRect(x: 0, y: 375, width: self.view.frame.width, height: 44), segmentTitle: ["Tasks", "Info"], selectedItemHighlightStyle: XMSelectedItemHighlightStyle.bottomEdge)
@@ -79,12 +91,12 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     func xmSegmentedControl(_ xmSegmentedControl: XMSegmentedControl, selectedSegment: Int) {
         if selectedSegment == 0 {
             UIView.animate(withDuration: 0.2, animations: {
-                self.taskTableView.alpha = 1
+                self.tasksView.alpha = 1
                 self.infoView.alpha = 0
             })
         } else if selectedSegment == 1 {
             UIView.animate(withDuration: 0.2, animations: {
-                self.taskTableView.alpha = 0
+                self.tasksView.alpha = 0
                 self.infoView.alpha = 1
                 })
         }
@@ -110,17 +122,41 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
     func retrieveTasks() {
-        Database.database().reference().child("Teams").child(myUser.teamID).child("UserTasks").child(myUser.userID).observe(.childAdded) { (snapshot) in
-            if let dict = snapshot.value as? [String:AnyObject] {
-                let task = Task(data: dict)
-                self.myTasks.append(task)
-                if task.done == true {
-                    self.completedTasks.append(task)
+        Database.database().reference().child("Teams").child(myUser.teamID).child("UserTasks").child(myUser.userID).observeSingleEvent(of: .value) { (snapshot) in
+            self.myTasks = []
+            self.completedTasks = []
+            Database.database().reference().child("Teams").child(self.myUser.teamID).child("NewTasks").child(self.myUser.userID).removeValue()
+            if let children = snapshot.children.allObjects as? [DataSnapshot] {
+                for child in children {
+                    if let dict = child.value as? [String:AnyObject] {
+                        let task = Task(data: dict)
+                        self.myTasks.append(task)
+                        self.taskTableView.reloadData()
+                        if task.done == true {
+                            self.completedTasks.append(task)
+                        }
+                        self.taskNumber.text = "\(self.myTasks.count)"
+                        self.updateCount()
+                    }
                 }
-                self.taskTableView.reloadData()
-                self.taskNumber.text = "\(self.myTasks.count)"
-                self.updateCount()
+            }
         }
+    }
+    
+    func updateTasks() {
+        Database.database().reference().child("Teams").child(myUser.teamID).child("UserTasks").child(myUser.userID).observe(.value) { (snap) in
+            self.myTasks = []
+            self.completedTasks = []
+            self.retrieveTasks()
+            self.taskTableView.reloadData()
+        }
+        Database.database().reference().child("Teams").child(myUser.teamID).child("UserTasks").child(myUser.userID).observe(.childRemoved) { (snap) in
+            self.myTasks = []
+            self.completedTasks = []
+            self.retrieveTasks()
+            self.taskTableView.reloadData()
+            self.taskNumber.text = "\(self.myTasks.count)"
+            self.updateCount()
         }
     }
     
@@ -128,8 +164,10 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         var count:Int!
         if myTasks.count > 0 {
             count = myTasks.count
+            self.taskPlaceHolder.isHidden = true
         } else {
-            count = 1
+            count = 0
+            self.taskPlaceHolder.isHidden = false
         }
         return count
     }
@@ -150,8 +188,6 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                 cell.accessoryView = view
             }
         updateCount()
-        } else {
-        
         }
         return cell
     }

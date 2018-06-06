@@ -40,8 +40,8 @@ class WelcomeVC: UIViewController {
         Database.database().reference().child("teamRef").observeSingleEvent(of: .value) { (snap) in
             if let children = snap.children.allObjects as? [DataSnapshot] {
                 if children.count > 0 {
-                    for snapshot in children {
-                        if let dict = snapshot.value as? [String:AnyObject] {
+                    for child in children {
+                        if let dict = child.value as? [String:AnyObject] {
                             let team = Team(data: dict)
                             if team.name.lowercased() == self.teamName.text! || team.name == self.teamName.text! || team.name.capitalized == self.teamName.text! {
                                 if team.pass == self.teamPass.text! { // Correct info given

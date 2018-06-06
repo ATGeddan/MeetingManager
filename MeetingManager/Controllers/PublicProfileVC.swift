@@ -19,6 +19,8 @@ protocol didRemoveDelegate {
 
 class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,XMSegmentedControlDelegate {
     
+    @IBOutlet weak var taskPlaceHolder: UIView!
+    @IBOutlet weak var tasksView: UIView!
     @IBOutlet weak var removeBtn: UIButton!
     @IBOutlet weak var makeAdminBtn: UIButton!
     @IBOutlet weak var birthLabel: UILabel!
@@ -47,7 +49,7 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
     override func viewDidLoad() {
         super.viewDidLoad()
         setUpProfile()
-        retrieveTasks()
+        updateTasks()
         setupSegmentedController()
         if myUser.userID == myTeam.adminID && selectedUser.userID != myTeam.adminID {
             makeAdminBtn.isHidden = false
@@ -82,8 +84,8 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
         Database.database().reference().child("Teams").child(myTeam.id).child("teaminfo").updateChildValues(["adminID":selectedUser.userID,"adminName":selectedUser.userFirstName+" "+selectedUser.userLastName])
         Database.database().reference().child("Teams").child(myTeam.id).child("Meetings").observeSingleEvent(of: .value) { (snap) in
             if let meetings = snap.children.allObjects as? [DataSnapshot] {
-                for x in 0..<meetings.count {
-                    if let dict = meetings[x].value as? [String:AnyObject] {
+                for meeting in meetings {
+                    if let dict = meeting.value as? [String:AnyObject] {
                         let meeting = MeetingModel(data: dict)
                         Database.database().reference().child("Teams").child(self.myTeam.id).child("Meetings").child(meeting.meetingID).updateChildValues(["teamAdmin":self.selectedUser.userID])
                         self.myTeam.updateAdmin(id:self.selectedUser.userID)
@@ -123,12 +125,12 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
     func xmSegmentedControl(_ xmSegmentedControl: XMSegmentedControl, selectedSegment: Int) {
         if selectedSegment == 0 {
             UIView.animate(withDuration: 0.2, animations: {
-                self.tasksTable.alpha = 1
+                self.tasksView.alpha = 1
                 self.infoView.alpha = 0
             })
         } else if selectedSegment == 1 {
             UIView.animate(withDuration: 0.2, animations: {
-                self.tasksTable.alpha = 0
+                self.tasksView.alpha = 0
                 self.infoView.alpha = 1
             })
         }
@@ -153,9 +155,11 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         var count:Int!
         if tasks.count > 0 {
-          count = tasks.count
+            count = tasks.count
+            taskPlaceHolder.isHidden = true
         } else {
-            count = 1
+            count = 0
+            taskPlaceHolder.isHidden = false
         }
         return count
     }
@@ -174,6 +178,11 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
                 let view = UIImageView(image: UIImage(named: "check"))
                 cell.accessoryView = view
             }
+            let myID = myUser.userID
+            if myID == myTeam.adminID {
+                cell.deleteBtn.tag = indexPath.row
+                cell.deleteBtn.isHidden = false
+            }
         }
         return cell
     }
@@ -186,18 +195,59 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
         completedNumber.text = "\(completedTasks.count)"
     }
 
-    func retrieveTasks() {
-        Database.database().reference().child("Teams").child(selectedUser.teamID).child("UserTasks").child(selectedUser.userID).observe(.childAdded) { (snapshot) in
-            if let dict = snapshot.value as? [String:AnyObject] {
-                let task = Task(data: dict)
-                self.tasks.append(task)
-                self.tasksTable.reloadData()
-                if task.done == true {
-                    self.completedTasks.append(task)
-                }
-                self.numberOfTasks.text = "\(self.tasks.count)"
-                self.updateCount()
+    @IBAction func deleteTaskClicked(_ sender: UIButton) {
+        let alert = UIAlertController(title: "Delete?", message: "Do you want to save or delete this task?", preferredStyle: UIAlertControllerStyle.alert)
+        alert.addAction(UIAlertAction(title: "Delete", style: UIAlertActionStyle.destructive, handler: { action in
+            self.confirmDelete(sender)
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    func confirmDelete(_ sender:UIButton) {
+        Database.database().reference().child("Teams").child(myTeam.id).child("NewTasks").child(selectedUser.userID).child(tasks[sender.tag].ID).removeValue()
+        Database.database().reference().child("Teams").child(selectedUser.teamID).child("UserTasks").child(selectedUser.userID).child(tasks[sender.tag].ID).removeValue { (error, ref) in
+            if error == nil {
+//                self.tasksTable.reloadData()
             }
+        }
+    }
+    
+    func retrieveTasks() {
+        Database.database().reference().child("Teams").child(selectedUser.teamID).child("UserTasks").child(selectedUser.userID).observeSingleEvent(of: .value) { (snapshot) in
+            self.tasks = []
+            self.completedTasks = []
+            if let children = snapshot.children.allObjects as? [DataSnapshot] {
+                for child in children {
+                    if let dict = child.value as? [String:AnyObject] {
+                        let task = Task(data: dict)
+                        self.tasks.append(task)
+                        self.tasksTable.reloadData()
+                        if task.done == true {
+                            self.completedTasks.append(task)
+                        }
+                        self.numberOfTasks.text = "\(self.tasks.count)"
+                        self.updateCount()
+                    }
+                }
+            }
+        }
+    }
+    
+    func updateTasks() {
+        Database.database().reference().child("Teams").child(selectedUser.teamID).child("UserTasks").child(selectedUser.userID).observe(.value) { (snap) in
+            self.tasks = []
+            self.completedTasks = []
+            self.retrieveTasks()
+            self.tasksTable.reloadData()
+        }
+        Database.database().reference().child("Teams").child(selectedUser.teamID).child("UserTasks").child(selectedUser.userID).observe(.childRemoved) { (snap) in
+            self.tasks = []
+            self.completedTasks = []
+            self.retrieveTasks()
+            self.tasksTable.reloadData()
+            self.numberOfTasks.text = "\(self.tasks.count)"
+            self.updateCount()
         }
     }
     

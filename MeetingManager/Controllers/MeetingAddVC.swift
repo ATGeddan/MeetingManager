@@ -84,6 +84,7 @@ class MeetingAddVC: UIViewController {
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
        
         if let destination = segue.destination as? MeetingVC {
+            destination.myUser = myUser
             if let model = sender as? MeetingModel {
                 destination.currentMeeting = model
             }

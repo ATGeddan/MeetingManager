@@ -66,7 +66,7 @@ class CreateTeamVC: UIViewController,UITextFieldDelegate {
             }
             
         } else {     // error msg 
-            let alert = UIAlertController(title: "Ops", message: "Please take a second look at the team name and password", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Ops", message: "Please make sure you are using proper name and password", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Got it", style: .default, handler: nil))
             self.present(alert,animated: true,completion: nil)
         }
@@ -89,10 +89,11 @@ class CreateTeamVC: UIViewController,UITextFieldDelegate {
     func getTeamNames() {
         Database.database().reference().child("teamRef").observeSingleEvent(of: .value) { (snap) in
             if let teams = snap.children.allObjects as? [DataSnapshot] {
-                for i in 0..<teams.count {
-                    if let dict = teams[i].value as? [String:AnyObject] {
-                        let teamName = dict["name"] as! String
-                        self.teamNames.append(teamName)
+                for team in teams {
+                    if let dict = team.value as? [String:AnyObject] {
+                        if let teamName = dict["name"] as? String {
+                            self.teamNames.append(teamName)
+                        }
                     }
                 }
             }

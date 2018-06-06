@@ -49,12 +49,13 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         getPhotos()
         setupTapAndAdmin()
         updateComments()
-        createDatePicker()
         getUsers()
         updateTasks()
+        createDatePicker()
     }
     
     @IBAction func homeClicked(_ sender: Any) {
+        imageScrollView.isHidden = true
         navigationController?.popToRootViewController(animated: true)
     }
     
@@ -77,6 +78,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
 
     func xmSegmentedControl(_ xmSegmentedControl: XMSegmentedControl, selectedSegment: Int) {
         if selectedSegment == 0 {
+            imageScrollView.isHidden = false
             UIView.animate(withDuration: 0.2, animations: {
                 self.photosView.alpha = 1
                 self.commentsView.alpha = 0
@@ -203,6 +205,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
      func deleteMeeting() {
+        meetingRef.child("Meetings").child(currentMeeting.meetingID).removeValue()
         for i in 0..<allImages.count {
         Storage.storage().reference().child("Teams").child(currentMeeting.teamID).child("meetingPhotos").child(currentMeeting.meetingID).child(allImages[i].ID).delete { (error) in
             if error != nil {
@@ -210,7 +213,6 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             }
         }
         }
-        meetingRef.child("Meetings").child(currentMeeting.meetingID).removeValue()
         meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).removeValue()
         meetingRef.child("Comments").child(currentMeeting.meetingID).removeValue()
         meetingRef.child("MeetingPhotos").child(currentMeeting.meetingID).removeValue { (error, ref) in
@@ -240,8 +242,8 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                             view.removeFromSuperview()
                         }
                     }
-                    for x in 0..<children.count {
-                        if let dict = children[x].value as? [String:AnyObject] {
+                    for child in children {
+                        if let dict = child.value as? [String:AnyObject] {
                             let imageX = ImageModel(data:dict)
                             self.allImages.insert(imageX, at: 0)
                             self.addToScroll(array: self.allImages)
@@ -316,7 +318,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
     }
     
-    @IBAction func addImagePressed(_ sender: UIButton) {
+    @IBAction func addImagePressed(_ sender: UIButton) {  // Check permission
         let photos = PHPhotoLibrary.authorizationStatus()
         if photos == .notDetermined {
             PHPhotoLibrary.requestAuthorization({status in
@@ -353,19 +355,12 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             
         }
     }
-    
-    func textFieldDidBeginEditing(_ textField: UITextField) {
-        self.navigationController?.navigationBar.isHidden = true
-    }
-    
-    func textFieldDidEndEditing(_ textField: UITextField) {
-        self.navigationController?.navigationBar.isHidden = false
-    }
+
     
     //______________________________________________________________________________________________________________
     // MARK: TableViews methods
     
-    @IBOutlet weak var commentPlaceholder: UIView!
+    
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         var count: Int!
@@ -462,6 +457,8 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     @IBOutlet var commentField: UITextField!
     var comments = [Comment]()
     @IBOutlet var sendButton: UIButton!
+    @IBOutlet weak var commentPlaceholder: UIView!
+    @IBOutlet var ComposeView: UIView!
     
     @IBAction func sendPressed(_ sender: Any) {
         if commentField.text != "" {
@@ -526,12 +523,15 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
     func deleteCommentTriggered(sender:UIButton) {
-        meetingRef.child("Comments").child(currentMeeting.meetingID).child(comments[sender.tag].ID).removeValue { (error, ref) in
-            if error == nil {
-//                self.comments.remove(at: sender.tag)
-                self.commentstableView.reloadData()
-            }
-        }
+        meetingRef.child("Comments").child(currentMeeting.meetingID).child(comments[sender.tag].ID).removeValue()
+    }
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        self.navigationController?.navigationBar.isHidden = true
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        self.navigationController?.navigationBar.isHidden = false
     }
     
     //______________________________________________________________________________________________________________
@@ -545,13 +545,14 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     @IBOutlet weak var userstableView: UITableView!
     var users = [User]()
     var chosenUsers = [String]()
-    @IBOutlet var ComposeView: UIView!
+
     @IBOutlet weak var taskPlaceHolder: UIView!
     
     @IBAction func addClicked(_ sender: UIButton) {
         if addingTask == false { // First it unchecks the old selected users
             let selectedItems = userstableView.indexPathsForSelectedRows
             if selectedItems != nil {
+                self.chosenUsers = []
             for x in selectedItems! {
                 userstableView.deselectRow(at: x, animated: true)
                 if let cell = userstableView.cellForRow(at: x) {
@@ -579,6 +580,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                 let taskDict = ["task":self.taskField.text!,"done":false,"ID":newID,"date":timestamp] as [String : Any]
                 databaseREF2.setValue(taskDict)
                 for x in 0...chosenUsers.count - 1 {
+                    meetingRef.child("NewTasks").child(chosenUsers[x]).child(newID).setValue(["task":newID])
                     let databaseREF = meetingRef.child("UserTasks").child(chosenUsers[x]).child(newID)
                     databaseREF.setValue(taskDict) { (error, ref) in
                     if error != nil {

@@ -64,7 +64,7 @@ class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSourc
     }
     
     func didRemoveMember() {
-        users.removeAll()
+        users = []
         getUsers()
         tableView.reloadData()
     }
@@ -80,7 +80,7 @@ class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSourc
     }()
     
     @objc func handleRefresh(_ refreshControl: UIRefreshControl) {
-        users.removeAll()
+        users = []
         getUsers()
         tableView.reloadData()
         refreshControl.endRefreshing()

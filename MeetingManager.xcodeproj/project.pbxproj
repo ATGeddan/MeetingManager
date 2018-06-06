@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2611052820C8603F0038E31E /* nextMeetingVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2611052720C8603F0038E31E /* nextMeetingVC.swift */; };
 		26D3F6C520BE02960072FA38 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6C420BE02960072FA38 /* AppDelegate.swift */; };
 		26D3F6CA20BE02960072FA38 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26D3F6C820BE02960072FA38 /* Main.storyboard */; };
 		26D3F6CC20BE02990072FA38 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26D3F6CB20BE02990072FA38 /* Assets.xcassets */; };
@@ -33,6 +34,7 @@
 /* Begin PBXFileReference section */
 		044725D78FCCE4E64D13F491 /* Pods-MeetingManager.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeetingManager.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MeetingManager/Pods-MeetingManager.debug.xcconfig"; sourceTree = "<group>"; };
 		25A660F79FD5A94C1AAE5BFE /* Pods-MeetingManager.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeetingManager.release.xcconfig"; path = "Pods/Target Support Files/Pods-MeetingManager/Pods-MeetingManager.release.xcconfig"; sourceTree = "<group>"; };
+		2611052720C8603F0038E31E /* nextMeetingVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nextMeetingVC.swift; sourceTree = "<group>"; };
 		26D3F6C120BE02960072FA38 /* MeetingManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MeetingManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		26D3F6C420BE02960072FA38 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		26D3F6C920BE02960072FA38 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -117,6 +119,7 @@
 				26D3F6D820BE030E0072FA38 /* MeetingVC.swift */,
 				26D3F6DA20BE030E0072FA38 /* WelcomeVC.swift */,
 				26D3F6DB20BE030F0072FA38 /* CreateTeamVC.swift */,
+				2611052720C8603F0038E31E /* nextMeetingVC.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -285,6 +288,7 @@
 				26D3F6E820BE03100072FA38 /* ProfileVC.swift in Sources */,
 				26D3F6E220BE03100072FA38 /* MeetingVC.swift in Sources */,
 				26D3F6F120BE03540072FA38 /* XMSegmentedControl.swift in Sources */,
+				2611052820C8603F0038E31E /* nextMeetingVC.swift in Sources */,
 				26D3F6E720BE03100072FA38 /* PublicProfileVC.swift in Sources */,
 				26D3F6E620BE03100072FA38 /* HomeVC.swift in Sources */,
 				26D3F6EA20BE03100072FA38 /* MeetingAddVC.swift in Sources */,
@@ -445,6 +449,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = V7T6P6UM67;
 				INFOPLIST_FILE = MeetingManager/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -464,6 +469,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = V7T6P6UM67;
 				INFOPLIST_FILE = MeetingManager/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

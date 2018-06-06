@@ -16,6 +16,7 @@ class cell1: UITableViewCell {
     @IBOutlet weak var adminBadge: UIImageView!
     
     override func awakeFromNib() {
+        super.awakeFromNib()
         cellBack.layer.cornerRadius = 10
         cellBack.addShadow(location: .bottom, color: UIColor.black, opacity: 0.8, radius: 3.0)
     }
@@ -34,6 +35,7 @@ class commentCell: UITableViewCell {
 }
 
 class profileCell: UITableViewCell {
+    @IBOutlet weak var deleteBtn: UIButton!
     @IBOutlet weak var taskLabel: UILabel!
     @IBOutlet weak var cellbackGround: UIView!
     @IBOutlet weak var dateLabel: UILabel!
@@ -51,5 +53,9 @@ class homeCell: UITableViewCell {
         placeLabel.text = place + " ,"
         cityLabel.text = city
     }
+}
+
+class userCell0: UITableViewCell {
+    @IBOutlet weak var userName: UILabel!
 }
 
