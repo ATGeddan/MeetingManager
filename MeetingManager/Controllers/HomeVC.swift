@@ -13,6 +13,9 @@ import SVProgressHUD
 
 class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     
+    @IBOutlet weak var confirmPassBtn: UIButton!
+    @IBOutlet weak var nextNotifLabel: UILabel!
+    @IBOutlet weak var notifBubble3: UIImageView!
     @IBOutlet weak var cellPlaceHolder: UIView!
     @IBOutlet weak var cancelBtn: UIButton!
     @IBOutlet weak var nextMCity: UILabel!
@@ -46,7 +49,9 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     var team = Team()
     var taskNumber = [DataSnapshot]()
     var nextID:String!
-    
+    var nextMeetingSeen = true
+    var newTasksSeen = true
+    var nexts = [MeetingModel]()
     
    
     override func viewDidLoad() {
@@ -160,15 +165,14 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
             if let children = snap.children.allObjects as? [DataSnapshot] {
                 if children.count > 0 {
                     self.taskNumber = children
-                    self.newTaskNumber.text = String(self.taskNumber.count)
+                    self.newTasksSeen = false
+                    self.checkNotifToggle()
                     self.newTaskNumber2.text = String(self.taskNumber.count)
-                    self.notifBubble.isHidden = false
-                    self.newTaskNumber.isHidden = false
                     self.notifBubble2.isHidden = false
                     self.newTaskNumber2.isHidden = false
                 } else {
-                    self.notifBubble.isHidden = true
-                    self.newTaskNumber.isHidden = true
+                    self.newTasksSeen = true
+                    self.checkNotifToggle()
                     self.notifBubble2.isHidden = true
                     self.newTaskNumber2.isHidden = true
                 }
@@ -186,22 +190,58 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         }
     }
     
+    func checkNotifToggle() {
+        if nextMeetingSeen == false || newTasksSeen == false {
+            self.newTaskNumber.text = "!"
+            self.notifBubble.isHidden = false
+            self.newTaskNumber.isHidden = false
+        } else {
+            self.notifBubble.isHidden = true
+            self.newTaskNumber.isHidden = true
+        }
+    }
+    
     func checkNextMeeting() {
         let ref = Database.database().reference().child("Teams").child(myUser.teamID).child("NextMeeting")
-        ref.child(myUser.userID).observe(.childAdded) { (snap) in
-            if let dict = snap.value as? [String:AnyObject] {
-                let meeting = MeetingModel(data: dict)
-                self.nextMDate.text = meeting.meetingDate
-                self.nextMCity.text = meeting.meetingCity
-                self.nextMPlace.text = meeting.meetingPlace
-                self.nextID = meeting.meetingID
-                if self.myUser.userID == self.team.adminID {
-                    self.cancelBtn.isHidden = false
-                }
+        ref.child(myUser.userID).observe(.value) { (snap) in
+                    if let dict = snap.value as? [String:AnyObject] {
+                        let meeting = MeetingModel(data: dict)
+                        self.nextMDate.text = meeting.meetingDate
+                        self.nextMCity.text = meeting.meetingCity
+                        self.nextMPlace.text = meeting.meetingPlace
+                        self.nextID = meeting.meetingID
+                        if self.myUser.userID == self.team.adminID {
+                            self.cancelBtn.isHidden = false
+                        }
+                        if meeting.seen == "false" {
+                            self.nextMeetingSeen = false
+                            self.checkNotifToggle()
+                            self.notifBubble3.isHidden = false
+                            self.nextNotifLabel.isHidden = false
+                        } else {
+                            self.nextMeetingSeen = true
+                            self.checkNotifToggle()
+                            self.notifBubble3.isHidden = true
+                            self.nextNotifLabel.isHidden = true
+                        }
+                        // Auto delete the meeting if time has passed - get Date from string
+                        let meetingFormat = meeting.formatDate
+                        let dateFormatter2 = DateFormatter()
+                        dateFormatter2.dateFormat = "yyyy-MM-dd HH:mm:ss +SSSS"
+                        let date33 = dateFormatter2.date(from: meetingFormat)
+                        let finalDate = date33?.addingTimeInterval(60.0 * 60.0 * 2.0) // Add 2 hours to adjust time zone
+                        let now = Date()
+                        if finalDate! < now {
+                            ref.child(self.myUser.userID).removeValue()
+                        }
             }
         }
-        
+    
         ref.child(myUser.userID).observe(.childRemoved) { (snap) in
+            self.nextMeetingSeen = true
+            self.checkNotifToggle()
+            self.notifBubble3.isHidden = true
+            self.nextNotifLabel.isHidden = true
             self.cancelBtn.isHidden = true
             self.nextMDate.text = "Next Meeting has not been decided yet"
             self.nextMPlace.text = ""
@@ -211,16 +251,29 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     
     @IBAction func cancelMeeting(_ sender: Any) {
         let ref = Database.database().reference().child("Teams").child(myUser.teamID)
-        ref.child("Members").observeSingleEvent(of: .value) { (snap) in
-            if let members = snap.children.allObjects as? [DataSnapshot] {
-                for member in members {
-                    if let dict = member.value as? [String:AnyObject] {
-                        let mmbr = User(data: dict)
-                        ref.child("NextMeeting").child(mmbr.userID).child(self.nextID).removeValue()
+            ref.child("NextMeeting").observeSingleEvent(of: .value) { (snap) in
+                self.nexts = []
+                if let nextMeetings = snap.children.allObjects as? [DataSnapshot] {
+                    for next in nextMeetings {
+                        if let dict = next.value as? [String:AnyObject] {
+                            let nxt = MeetingModel(data: dict)
+                            self.nexts.append(nxt)
+                        }
                     }
                 }
             }
-        }
+        let alert = UIAlertController(title: "Are you sure?", message: "Do you want to cancel the next meeting?", preferredStyle: UIAlertControllerStyle.alert)
+        alert.addAction(UIAlertAction(title: "Sure", style: .destructive, handler: { (action) in
+            self.confirmNextCancel()
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+        self.present(alert, animated: true, completion: nil)
+        
+    }
+    
+    func confirmNextCancel() {
+        let ref = Database.database().reference().child("Teams").child(myUser.teamID)
+        ref.child("NextMeeting").removeValue()
     }
     
     func getTeamData() {
@@ -303,9 +356,6 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
                 Database.database().reference().child("Teams").child(self.myUser.teamID).child("teaminfo").updateChildValues(["password":newPass])
                 Database.database().reference().child("teamRef").child(self.myUser.teamID).updateChildValues(["password":newPass])
                 self.openClosePass()
-                self.newPassField.text = ""
-                self.confirmField.text = ""
-                self.oldPassField.text = ""
             } else {
                 let alert = UIAlertController(title: "Confirm new password", message: "Your new password and confirm password do not match", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
@@ -320,6 +370,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     
     func openClosePass() {
         if viewTop.constant == 32 {
+            confirmPassBtn.isHidden = false
             UIView.animate(withDuration: 0.3) {
                 self.viewTop.constant = 208
                 self.view.layoutIfNeeded()
@@ -329,6 +380,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
                 self.viewTop.constant = 32
                 self.view.layoutIfNeeded()
             }
+            confirmPassBtn.isHidden = true
             oldPassField.text = ""
             newPassField.text = ""
             confirmField.text = ""
@@ -483,6 +535,10 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
                 self.nextMeetingLeading.constant = -14
                 self.view.layoutIfNeeded()
             }
+            if nextMeetingSeen == false {
+                let ref = Database.database().reference().child("Teams").child(myUser.teamID).child("NextMeeting")
+                ref.child(myUser.userID).updateChildValues(["seen":"true"])
+            }
         } else {
             UIView.animate(withDuration: 0.3) {
                 self.nextMeetingLeading.constant = -200
@@ -554,8 +610,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         }
         
         if let des = segue.destination as? ProfileVC {
-            self.notifBubble.isHidden = true
-            self.newTaskNumber.isHidden = true
+            self.checkNotifToggle()
             self.notifBubble2.isHidden = true
             self.newTaskNumber2.isHidden = true
             if let user = sender as? User {

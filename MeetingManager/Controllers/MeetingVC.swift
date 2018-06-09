@@ -12,7 +12,7 @@ import SVProgressHUD
 import Firebase
 import Kingfisher
 
-class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate,UITableViewDelegate,UITableViewDataSource,UITextFieldDelegate,XMSegmentedControlDelegate {
+class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate,UITableViewDelegate,UITableViewDataSource,UITextFieldDelegate,UITextViewDelegate,XMSegmentedControlDelegate {
     
     @IBOutlet weak var commentstableView: UITableView!
     @IBOutlet weak var commentsView: UIView!
@@ -46,12 +46,22 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         imagePicker.delegate = self
         recieveMeetingInfo()
         addSegmentedController()
-        getPhotos()
         setupTapAndAdmin()
-        updateComments()
         getUsers()
-        updateTasks()
         createDatePicker()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(true)
+        updateComments()
+        getPhotos()
+        updateTasks()
+        updateLinks()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(true)
+        meetingRef.child(currentMeeting.meetingID).removeAllObservers()
     }
     
     @IBAction func homeClicked(_ sender: Any) {
@@ -63,7 +73,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     // MARK: Setting up ViewDidLoad
     
     func addSegmentedController() {
-        let titles = ["Photos", "Tasks", "Comments"]
+        let titles = ["Comments", "Tasks", "Attachments"]
         let icons = [UIImage(named: "icon1")!, UIImage(named: "icon2")!, UIImage(named: "icon3")!]
         let frame = CGRect(x: 0, y: 309, width: self.view.frame.width, height: 44)
         segmentedControl2 = XMSegmentedControl(frame: frame, segmentContent: (titles, icons), selectedItemHighlightStyle: XMSelectedItemHighlightStyle.bottomEdge)
@@ -80,8 +90,8 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         if selectedSegment == 0 {
             imageScrollView.isHidden = false
             UIView.animate(withDuration: 0.2, animations: {
-                self.photosView.alpha = 1
-                self.commentsView.alpha = 0
+                self.photosView.alpha = 0
+                self.commentsView.alpha = 1
                 self.tasksView.alpha = 0
             })
         } else if selectedSegment == 1 {
@@ -93,8 +103,8 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             })
         } else if selectedSegment == 2 {
             UIView.animate(withDuration: 0.2, animations: {
-                self.photosView.alpha = 0
-                self.commentsView.alpha = 1
+                self.photosView.alpha = 1
+                self.commentsView.alpha = 0
                 self.tasksView.alpha = 0
             })
         }
@@ -120,8 +130,9 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         let tapGesture1 = UITapGestureRecognizer(target: self, action: #selector(tableViewTapped))
         commentstableView.addGestureRecognizer(tapGesture1)
         // some extra view did load preps
-        commentsView.alpha = 0
         tasksView.alpha = 0
+        photosView.alpha = 0
+        attachPopUp.alpha = 0
         ComposeView.addShadow(location: .top, color: UIColor.black, opacity: 0.5, radius: 3.0)
         photosView.addGestureRecognizer(imageScrollView.panGestureRecognizer)
         commentstableView.rowHeight = UITableViewAutomaticDimension
@@ -229,6 +240,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     @IBOutlet weak var imageScrollView: UIScrollView!
     var allImages = [ImageModel]()
     @IBOutlet weak var addPhotoBtn: UIButton!
+    @IBOutlet weak var linksTexts: UITextView!
     
     func getPhotos() {
         let meetingRef2 = meetingRef.child("MeetingPhotos").child(currentMeeting.meetingID)
@@ -269,8 +281,8 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             let scrollWidth = self.imageScrollView.frame.size.width
             let scrollheight = self.imageScrollView.frame.size.height
             
-            let newX =  scrollWidth * CGFloat(i)
-            let imageview = SLImageView(frame: CGRect(x:((scrollWidth / 2) - 75) + newX , y:((scrollheight / 2) - 90) ,width:150, height:150))
+            let newX =  100 * CGFloat(i)
+            let imageview = SLImageView(frame: CGRect(x:20 + newX , y:((scrollheight / 2) - 45) ,width:90, height:90))
             imageview.kf.setImage(with: Resource)
             imageview.contentMode = .scaleAspectFill
             imageview.layer.borderWidth = 0.5
@@ -278,6 +290,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             imageview.layer.cornerRadius = 10
             imageview.clipsToBounds = true
             imageview.imageID = currentImage.ID
+            imageview._uploader = array[i].uploaderName
             let longPress = UILongPressGestureRecognizer(target: self, action: #selector(saveDeleteAlert(_:)))
             imageview.addGestureRecognizer(longPress)
             self.imageScrollView.addSubview(imageview)
@@ -287,17 +300,21 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
     @objc func saveDeleteAlert(_ sender: UILongPressGestureRecognizer) {
-        let alert = UIAlertController(title: "Save or Delete?", message: "Do you want to save or delete this image?", preferredStyle: UIAlertControllerStyle.alert)
+        let alert = UIAlertController(title: "Save?", message: "Do you want to save this image?", preferredStyle: UIAlertControllerStyle.alert)
         
         alert.addAction(UIAlertAction(title: "Save", style: UIAlertActionStyle.default, handler: { action in
             let imageview = sender.view as! SLImageView
             self.saveTriggered(image: imageview.image!)
         }))
-        alert.addAction(UIAlertAction(title: "Delete", style: UIAlertActionStyle.destructive, handler: { action in
-            let imageview = sender.view as! SLImageView
-            let id2 = imageview.imageID
-            self.deleteTriggered(id:id2!)
-        }))
+        let imageview = sender.view as! SLImageView
+        let id2 = imageview.imageID
+        let myname = self.myUser.userFirstName + " " + self.myUser.userLastName
+        let imageUploader = imageview.uploader
+        if myUser.userID == currentMeeting.teamAdmin || myname == imageUploader || myUser.userID == currentMeeting.meetingAdmin {
+            alert.addAction(UIAlertAction(title: "Delete", style: UIAlertActionStyle.destructive, handler: { action in
+                self.deleteTriggered(id:id2!)
+            }))
+        }
         alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
         
         self.present(alert, animated: true, completion: nil)
@@ -343,9 +360,10 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                 // When the image has successfully uploaded, we get its download URL
                 storageRef.downloadURL(completion: { (url, error) in
                     if let urlText = url?.absoluteString {
-                        let dict = ["url" : urlText,"ID" : imageID]
+                        let dict = ["url" : urlText,
+                                    "ID" : imageID,
+                                    "uploaderName":self.myUser.userFirstName + " " + self.myUser.userLastName]
                         meetingRef2.updateChildValues(dict)
-                        SVProgressHUD.dismiss()
                         self.meetingRef.child("photosRef").child(imageID).setValue(["id":imageID])
                         
                     }
@@ -355,7 +373,128 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             
         }
     }
+    //______________________________________________________________________________________________________________
+    
+    @IBOutlet weak var addLinkBtn: UIButton!
+    @IBOutlet weak var attachPopUp: UIView!
+    @IBOutlet weak var attachTitle: UITextField!
+    @IBOutlet weak var attachLink: UITextField!
+    
+    var links = [LinkModel]()
+    
+    
+    @IBAction func attachLinks(_ sender: Any) {
+        UIView.animate(withDuration: 0.15) {
+            self.attachPopUp.alpha = 1
+            self.addLinkBtn.alpha = 0
+        }
+    }
+    
+    @IBAction func attachPressed(_ sender: Any) {
+        if attachTitle.text != "" && attachLink.text != "" {
+            let linkRef = Database.database().reference().child("Teams").child(myUser.teamID).child("MeetingLinks").child(currentMeeting.meetingID).childByAutoId()
+            let autoID = linkRef.key
+            let linkDict = ["url":attachLink.text!,
+                            "title":attachTitle.text!,
+                            "uploaderID":self.myUser.userID,
+                            "ID":autoID]
+            linkRef.setValue(linkDict)
+            UIView.animate(withDuration: 0.15) {
+                self.attachPopUp.alpha = 0
+                self.addLinkBtn.alpha = 1
+            }
+            self.attachLink.text = ""
+            self.attachTitle.text = ""
+            self.view.endEditing(true)
+        }
+    }
+    
+    @IBAction func cancelPressed(_ sender: Any) {
+        UIView.animate(withDuration: 0.15) {
+            self.attachPopUp.alpha = 0
+            self.addLinkBtn.alpha = 1
+        }
+        attachLink.text = ""
+        attachTitle.text = ""
+    }
+    
+    func getLinks() {
+        let linkRef = meetingRef.child("MeetingLinks").child(currentMeeting.meetingID)
+        linkRef.observeSingleEvent(of: .value) { (snap) in
+            if let children = snap.children.allObjects as? [DataSnapshot] {
+                let attributedString = NSMutableAttributedString()
+                self.links = []
+                for i in 0..<children.count {
+                    if let dict = children[i].value as? [String:AnyObject] {
+                        let link = LinkModel(data: dict)
+                        self.links.insert(link, at: 0)
+                        let attributedString2 = NSMutableAttributedString(string: "\(link.title.capitalized) \n \n")
+                        let myRange = NSRange(location: 0 , length: link.title.count)
+                        attributedString2.addAttribute(.link, value: link.url, range: myRange)
+                        if link.title.count < 20 {
+                            attributedString2.addAttribute(.font, value: UIFont(name: "AvenirNext-DemiBold", size: 20)!, range: myRange)
+                        } else {
+                            attributedString2.addAttribute(.font, value: UIFont(name: "AvenirNext-DemiBold", size: 13)!, range: myRange)
+                        }
+                        attributedString2.addAttribute(kCTUnderlineStyleAttributeName as NSAttributedStringKey , value: NSUnderlineStyle.styleSingle.rawValue, range: myRange)
+                        attributedString.insert(attributedString2, at: 0)
+                        self.linksTexts.attributedText = attributedString
+                        let myid = self.myUser.userID
+                        if myid == self.currentMeeting.teamAdmin || myid == link.uploaderID || myid == self.currentMeeting.meetingAdmin {
+                            let y = 14.5 + (40.5 * Double(i))
+                            let btn = UIButton(frame: CGRect(x: Int(self.linksTexts.frame.width - 100.0), y: Int(y), width: 18, height: 18))
+                            btn.setImage(UIImage(named: "deleteCell"), for: .normal)
+                            btn.tag = i + 1
+                            btn.addTarget(self, action: #selector(self.buttonAction), for: .touchUpInside)
+                            self.linksTexts.addSubview(btn)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    func updateLinks() {
+        Database.database().reference().child("Teams").child(myUser.teamID).child("MeetingLinks").child(currentMeeting.meetingID).observe(.childRemoved) { (snap) in
+            self.linksTexts.text = ""
+            self.links = []
+            self.getLinks()
+        }
+        Database.database().reference().child("Teams").child(myUser.teamID).child("MeetingLinks").child(currentMeeting.meetingID).observe(.childAdded) { (snap) in
+            self.links = []
+            self.getLinks()
+        }
+    }
+    
+    @objc func buttonAction(_ sender: UIButton) {
+        let alert = UIAlertController(title: "Delete?", message: "Do you want to delete this link?", preferredStyle: UIAlertControllerStyle.alert)
+        
+        alert.addAction(UIAlertAction(title: "Delete", style: UIAlertActionStyle.destructive, handler: { action in
+            self.deleteLinkTriggered(sender)
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+        
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    func deleteLinkTriggered(_ sender:UIButton) {
+        let ref = Database.database().reference().child("Teams").child(myUser.teamID).child("MeetingLinks").child(currentMeeting.meetingID)
+        ref.child(links[sender.tag - 1].ID).removeValue { (err, ref) in
+            if err == nil {
+                for view in self.linksTexts.subviews {
+                    if view.tag != 0 {
+                        view.removeFromSuperview()
+                    }
+                }
+            }
+        }
 
+    }
+    
+    func textView(_ textView: UITextView, shouldInteractWith URL: URL, in characterRange: NSRange, interaction: UITextItemInteraction) -> Bool {
+        UIApplication.shared.open(URL, options: [:])
+        return false
+    }
     
     //______________________________________________________________________________________________________________
     // MARK: TableViews methods

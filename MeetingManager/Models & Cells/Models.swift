@@ -232,6 +232,8 @@ class MeetingModel {
     private var _teamID:String!
     private var _meetingAdmin:String!
     private var _teamAdmin:String!
+    private var _formatDate:String!
+    private var _seen:String!
     
     var meetingDate:String {
         return _meetingDate
@@ -256,6 +258,12 @@ class MeetingModel {
     }
     var teamAdmin:String {
         return _teamAdmin
+    }
+    var formatDate:String {
+        return _formatDate
+    }
+    var seen:String {
+        return _seen
     }
     
     init() {
@@ -286,6 +294,12 @@ class MeetingModel {
         }
         if let teamAdmin = data["teamAdmin"] as? String {
             _teamAdmin = teamAdmin
+        }
+        if let formatDate = data["formatDate"] as? String {
+            _formatDate = formatDate
+        }
+        if let seen = data["seen"] as? String {
+            _seen = seen
         }
     }
     
@@ -389,6 +403,7 @@ class Task {
 class ImageModel {
     private var _url:String!
     private var _ID:String!
+    private var _uploaderName:String!
     
     var url:String {
         return _url
@@ -396,6 +411,9 @@ class ImageModel {
     
     var ID:String {
         return _ID
+    }
+    var uploaderName:String {
+        return _uploaderName
     }
     
     init(data:Dictionary<String,AnyObject>) {
@@ -405,5 +423,48 @@ class ImageModel {
         if let ID2 = data["ID"] as? String {
             _ID = ID2
         }
+        if let uploaderName2 = data["uploaderName"] as? String {
+            _uploaderName = uploaderName2
+        }
     }
 }
+
+// ------------------------------------------
+// Meeting Link
+
+class LinkModel {
+    private var _url:String!
+    private var _title:String!
+    private var _uploaderID:String!
+    private var _ID:String!
+    
+    var url:String {
+        return _url
+    }
+    
+    var title:String {
+        return _title
+    }
+    var uploaderID:String {
+        return _uploaderID
+    }
+    var ID:String {
+        return _ID
+    }
+    
+    init(data:Dictionary<String,AnyObject>) {
+        if let url = data["url"] as? String {
+            _url = url
+        }
+        if let title = data["title"] as? String {
+            _title = title
+        }
+        if let uploaderID = data["uploaderID"] as? String {
+            _uploaderID = uploaderID
+        }
+        if let ID = data["ID"] as? String {
+            _ID = ID
+        }
+    }
+}
+

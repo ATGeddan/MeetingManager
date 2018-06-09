@@ -15,6 +15,7 @@ class SLImageView: UIImageView {
     var closeLabel: UILabel!
     var blackBackGroundView = UIView()
     var imageID:String!
+    var _uploader:String!
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -47,6 +48,7 @@ class SLImageView: UIImageView {
         
         return tmpImageView
     }
+
     
     fileprivate func createBackGround() -> UIView {
         let BG = UIView(frame: (window?.frame)!)
@@ -58,7 +60,11 @@ class SLImageView: UIImageView {
     fileprivate func createLabel() -> UILabel {
         
         let label = UILabel(frame: CGRect.zero)
-        label.text = "Touch to hide"
+        if _uploader != nil {
+            label.text = "By: \(_uploader). Tap to dismiss"
+        } else {
+            label.text = "Tap to dismiss"
+        }
         label.font = UIFont(name: "HelveticaNeue", size: 12.0)
         label.sizeToFit()
         label.textAlignment = NSTextAlignment.center

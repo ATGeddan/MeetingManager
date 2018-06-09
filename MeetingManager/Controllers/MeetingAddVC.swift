@@ -10,7 +10,7 @@ import UIKit
 import Firebase
 import SVProgressHUD
 
-class MeetingAddVC: UIViewController {
+class MeetingAddVC: UIViewController,UITextViewDelegate {
     @IBOutlet weak var dateField: UITextField!
     @IBOutlet weak var placeField: UITextField!
     @IBOutlet weak var cityField: UITextField!
@@ -24,7 +24,12 @@ class MeetingAddVC: UIViewController {
         createDatePicker()
         dateField.text = DateFormatter.localizedString(from: NSDate() as Date, dateStyle: .medium, timeStyle: .none)
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(donePressed))
-
+    }
+    
+    func textViewDidBeginEditing(_ textView: UITextView) {
+        if textView.text == "Enter your notes here ..." {
+            textView.text = ""
+        }
     }
     
     func createDatePicker() {

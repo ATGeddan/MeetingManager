@@ -11,7 +11,8 @@ import Firebase
 
 class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
 
-    @IBOutlet weak var timeField: UITextField!
+    @IBOutlet weak var membersBtn: UIButton!
+    @IBOutlet weak var allMemberBtn: UIButton!
     @IBOutlet weak var tableBottom: NSLayoutConstraint!
     @IBOutlet weak var userTableView: UITableView!
     @IBOutlet weak var cityField: UITextField!
@@ -22,6 +23,7 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
     var chosenUsers = [String]()
     var myUser = User()
     let picker = UIDatePicker()
+    var formatDate = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,7 +35,7 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
     
     
 
-    @IBAction func allPressed(_ sender: Any) {
+    @IBAction func allPressed(_ sender: UIButton) {
         if tableBottom.constant == 0 {
             UIView.animate(withDuration: 0.3) {
                 self.tableBottom.constant = 288
@@ -41,15 +43,19 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
             }
         }
         chosenUsers = []
+        allMemberBtn.setImage(UIImage(named: "buttonOn"), for: .normal)
+        membersBtn.setImage(UIImage(named: "buttonOff"), for: .normal)
         for user in users {
             chosenUsers.append(user.userID)
         }
 
     }
     
-    @IBAction func specificPressed(_ sender: Any) {
+    @IBAction func specificPressed(_ sender: UIButton) {
         
         if tableBottom.constant == 288 {
+            allMemberBtn.setImage(UIImage(named: "buttonOff"), for: .normal)
+            membersBtn.setImage(UIImage(named: "buttonOn"), for: .normal)
             self.chosenUsers = []
             let selectedItems = userTableView.indexPathsForSelectedRows
             if selectedItems != nil {
@@ -118,15 +124,18 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
     
     @objc func donePressed() {
         if dateField.text != "" && placeField.text != "" && cityField.text != "" && chosenUsers != [] {
-        for chosenUser in chosenUsers {
-            let teamRef = Database.database().reference().child("Teams").child(myUser.teamID).child("NextMeeting")
-            let autoID = Int(NSDate.timeIntervalSinceReferenceDate*1000)
-            let new = ["date":dateField.text!,
-                       "place":placeField.text!,
-                       "city":cityField.text!,
-                       "ID":"\(autoID)"]
-            teamRef.child(chosenUser).child("\(autoID)").updateChildValues(new)
-        }
+            for chosenUser in chosenUsers {
+                let teamRef = Database.database().reference().child("Teams").child(myUser.teamID).child("NextMeeting")
+                teamRef.child(chosenUser).removeValue()
+                let autoID = Int(NSDate.timeIntervalSinceReferenceDate*1000)
+                let new = ["date":dateField.text!,
+                           "place":placeField.text!,
+                           "city":cityField.text!,
+                           "ID": "\(autoID)",
+                           "formatDate":formatDate,
+                           "seen":"false"]
+                teamRef.child(chosenUser).updateChildValues(new)
+            }
         navigationController?.popViewController(animated: true)
         }
     }
@@ -148,6 +157,12 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         let dateString = formatter.string(from: picker.date)
+        
+        let dateFormatter2 = DateFormatter()
+        dateFormatter2.dateFormat = "yyyy-MM-dd HH:mm:ss +SSSS"
+        let dateString2 = dateFormatter2.string(from: picker.date)
+        formatDate = dateString2
+        
         dateField.text = dateString
         self.view.endEditing(true)
     }
