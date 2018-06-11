@@ -17,6 +17,10 @@ class SLImageView: UIImageView {
     var imageID:String!
     var _uploader:String!
     
+    var uploader:String {
+        return _uploader
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.setup()
@@ -61,7 +65,7 @@ class SLImageView: UIImageView {
         
         let label = UILabel(frame: CGRect.zero)
         if _uploader != nil {
-            label.text = "By: \(_uploader). Tap to dismiss"
+            label.text = "By: \(uploader). Tap to dismiss"
         } else {
             label.text = "Tap to dismiss"
         }

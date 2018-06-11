@@ -36,6 +36,7 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
     
 
     @IBAction func allPressed(_ sender: UIButton) {
+        self.view.endEditing(true)
         if tableBottom.constant == 0 {
             UIView.animate(withDuration: 0.3) {
                 self.tableBottom.constant = 288
@@ -52,7 +53,7 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
     }
     
     @IBAction func specificPressed(_ sender: UIButton) {
-        
+        self.view.endEditing(true)
         if tableBottom.constant == 288 {
             allMemberBtn.setImage(UIImage(named: "buttonOff"), for: .normal)
             membersBtn.setImage(UIImage(named: "buttonOn"), for: .normal)

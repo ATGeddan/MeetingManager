@@ -26,6 +26,7 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
         super.viewDidLoad()
         createDatePicker()
         confirmField.delegate = self
+        passField.delegate = self
         self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
         self.navigationController?.navigationBar.shadowImage = UIImage()
         self.navigationController?.navigationBar.isTranslucent = true
@@ -39,7 +40,7 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
-        if confirmField.text?.isEmpty == false {
+        if passField.text != "" {
             if confirmField.text == passField.text {
                 correct.isHidden = false
                 wrong.isHidden = true

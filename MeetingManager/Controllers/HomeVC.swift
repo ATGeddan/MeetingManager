@@ -349,22 +349,24 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     }
     
     @IBAction func confirmPass(_ sender: Any) {
-        if oldPassField.text == team.pass {
-            if newPassField.text == confirmField.text {
-                guard let newPass = newPassField.text else {return}
-                self.team.changePass(pass:newPass)
-                Database.database().reference().child("Teams").child(self.myUser.teamID).child("teaminfo").updateChildValues(["password":newPass])
-                Database.database().reference().child("teamRef").child(self.myUser.teamID).updateChildValues(["password":newPass])
-                self.openClosePass()
+        if oldPassField.text != "" && newPassField.text != "" {
+            if oldPassField.text == team.pass {
+                if newPassField.text == confirmField.text {
+                    guard let newPass = newPassField.text else {return}
+                    self.team.changePass(pass:newPass)
+                    Database.database().reference().child("Teams").child(self.myUser.teamID).child("teaminfo").updateChildValues(["password":newPass])
+                    Database.database().reference().child("teamRef").child(self.myUser.teamID).updateChildValues(["password":newPass])
+                    self.openClosePass()
+                } else {
+                    let alert = UIAlertController(title: "Confirm new password", message: "Your new password and confirm password do not match", preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                    self.present(alert,animated: true,completion: nil)
+                }
             } else {
-                let alert = UIAlertController(title: "Confirm new password", message: "Your new password and confirm password do not match", preferredStyle: .alert)
+                let alert = UIAlertController(title: "Incorrect", message: "Old password is incorrect", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
                 self.present(alert,animated: true,completion: nil)
             }
-        } else {
-            let alert = UIAlertController(title: "Incorrect", message: "Old password is incorrect", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            self.present(alert,animated: true,completion: nil)
         }
     }
     
@@ -427,6 +429,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         }
         Database.database().reference().child("teamRef").child(teamid!).removeValue()
         Database.database().reference().child("Teams").child(teamid!).child("Meetings").removeValue()
+        Database.database().reference().child("Teams").child(teamid!).child("MeetingLinks").removeValue()
         Database.database().reference().child("Teams").child(teamid!).child("UserTasks").removeValue()
         SVProgressHUD.dismiss()
         self.performSegue(withIdentifier: "backWelcome", sender: self.myUser)

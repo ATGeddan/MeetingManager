@@ -144,7 +144,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
     func updateTasks() {
-        Database.database().reference().child("Teams").child(myUser.teamID).child("UserTasks").child(myUser.userID).observe(.value) { (snap) in
+        Database.database().reference().child("Teams").child(myUser.teamID).child("UserTasks").child(myUser.userID).observe(.childAdded) { (snap) in
             self.myTasks = []
             self.completedTasks = []
             self.retrieveTasks()

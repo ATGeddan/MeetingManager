@@ -232,7 +232,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		7A0F252469B9C72AAEB4B799 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 12;
 			files = (
 			);
 			inputPaths = (
