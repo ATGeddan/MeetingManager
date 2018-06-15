@@ -294,6 +294,10 @@
                                                 </connections>
                                             </tableViewCell>
                                         </prototypes>
+                                        <connections>
+                                            <outlet property="dataSource" destination="xeQ-v2-Ecf" id="qc2-fw-Rf4"/>
+                                            <outlet property="delegate" destination="xeQ-v2-Ecf" id="SZM-pT-v4a"/>
+                                        </connections>
                                     </tableView>
                                     <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NON-oa-lE2">
                                         <rect key="frame" x="6" y="211" width="365" height="63"/>
@@ -355,7 +359,7 @@
                                             </userDefinedRuntimeAttribute>
                                         </userDefinedRuntimeAttributes>
                                     </textField>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Chagne team password" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="13" translatesAutoresizingMaskIntoConstraints="NO" id="DyU-YH-pOn">
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Change team password" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="13" translatesAutoresizingMaskIntoConstraints="NO" id="DyU-YH-pOn">
                                         <rect key="frame" x="101" y="14" width="171" height="32"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <fontDescription key="fontDescription" name="AvenirNext-DemiBold" family="Avenir Next" pointSize="15"/>
@@ -727,8 +731,8 @@
                                 <rect key="frame" x="44" y="19" width="29" height="25"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                             </imageView>
-                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="12" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dAf-Mz-ce3">
-                                <rect key="frame" x="50" y="21" width="16" height="17"/>
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="!" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dAf-Mz-ce3">
+                                <rect key="frame" x="56" y="21" width="4" height="17"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <fontDescription key="fontDescription" name="HelveticaNeue-Bold" family="Helvetica Neue" pointSize="14"/>
                                 <color key="textColor" red="0.76804640609999997" green="0.77457536130000004" blue="0.83878676470000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -1320,7 +1324,7 @@
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JE8-Dd-bsA">
-                                                <rect key="frame" x="133" y="41" width="108" height="90"/>
+                                                <rect key="frame" x="133" y="29" width="108" height="90"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <state key="normal" image="button-black-instagram"/>
                                                 <connections>
@@ -1505,7 +1509,7 @@
                                 <inset key="separatorInset" minX="15" minY="0.0" maxX="15" maxY="0.0"/>
                                 <color key="sectionIndexTrackingBackgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="cell1" rowHeight="57" id="hO5-iY-g8C" customClass="cell1" customModule="MeetingManager" customModuleProvider="target">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="none" indentationWidth="10" reuseIdentifier="membersCell" rowHeight="57" id="hO5-iY-g8C" customClass="membersCell" customModule="MeetingManager" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="28" width="355" height="57"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="hO5-iY-g8C" id="9A5-Ln-UMp">
@@ -1571,7 +1575,7 @@
                     </view>
                     <nil key="simulatedBottomBarMetrics"/>
                     <connections>
-                        <outlet property="tableView" destination="Zqa-kJ-q6P" id="jbi-cP-Snn"/>
+                        <outlet property="membersTableView" destination="Zqa-kJ-q6P" id="jbi-cP-Snn"/>
                         <segue destination="kW0-i1-FHn" kind="show" identifier="showProfile" id="BU5-5F-hrR"/>
                     </connections>
                 </viewController>
@@ -2372,7 +2376,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <stackView opaque="NO" contentMode="scaleToFill" spacing="6" translatesAutoresizingMaskIntoConstraints="NO" id="IYo-Zg-81y">
-                                <rect key="frame" x="26" y="301" width="323" height="54"/>
+                                <rect key="frame" x="26" y="301.5" width="323" height="54"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="L5A-Du-1Tv">
                                         <rect key="frame" x="0.0" y="0.0" width="160" height="54"/>
@@ -3225,7 +3229,7 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="pBT-j0-qo4"/>
-        <segue reference="HTU-Kv-bNX"/>
+        <segue reference="eCB-cl-eem"/>
         <segue reference="QVq-js-cdu"/>
         <segue reference="7hQ-6z-bvp"/>
     </inferredMetricsTieBreakers>
