@@ -14,6 +14,7 @@ import Kingfisher
 
 class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSource,XMSegmentedControlDelegate {
   
+  @IBOutlet weak var segmentBG: UIImageView!
   @IBOutlet weak var taskPlaceHolder: UIView!
   @IBOutlet weak var tasksView: UIView!
   @IBOutlet weak var removeBtn: UIButton!
@@ -36,7 +37,7 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
   var myUser = User()
   var myTeam = Team()
   var tasks = [Task]()
-  var completedTasks = [Int]()
+  var completedTasks = 0
   
   var delegate:changeAdminDelegate!
   var delegate2:didRemoveMemberDelegate!
@@ -110,15 +111,20 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
   
   fileprivate func setupSegmentedController() {
     infoView.alpha = 0
-    let segmentedControl3 = XMSegmentedControl(frame: CGRect(x: 0, y: 375, width: self.view.frame.width, height: 44), segmentTitle: ["Tasks", "Info"], selectedItemHighlightStyle: XMSelectedItemHighlightStyle.bottomEdge)
-    segmentedControl3.delegate = self
-    segmentedControl3.backgroundColor = UIColor.clear
-    segmentedControl3.highlightColor = UIColor(red: 192/255, green: 192/255, blue: 192/255, alpha: 1)
-    segmentedControl3.tint = UIColor(red: 220/255, green: 220/255, blue: 220/255, alpha: 0.7)
-    segmentedControl3.highlightTint = UIColor(red: 200/255, green: 200/255, blue: 200/255, alpha: 1)
-    segmentedControl3.addShadow(location: .top, color: UIColor.darkGray, opacity: 0.5, radius: 3.0)
+    let segmentedControl2 = XMSegmentedControl(frame: CGRect(x: 0, y: 375, width: self.view.frame.width, height: 44), segmentTitle: ["Tasks", "Info"], selectedItemHighlightStyle: XMSelectedItemHighlightStyle.bottomEdge)
+    segmentedControl2.delegate = self
+    segmentedControl2.backgroundColor = UIColor.clear
+    segmentedControl2.highlightColor = UIColor(red: 192/255, green: 192/255, blue: 192/255, alpha: 1)
+    segmentedControl2.tint = UIColor(red: 220/255, green: 220/255, blue: 220/255, alpha: 0.7)
+    segmentedControl2.highlightTint = UIColor(red: 200/255, green: 200/255, blue: 200/255, alpha: 1)
+    segmentedControl2.addShadow(location: .top, color: UIColor.darkGray, opacity: 0.5, radius: 3.0)
     
-    self.view.addSubview(segmentedControl3)
+    self.view.addSubview(segmentedControl2)
+    segmentedControl2.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.centerX, relatedBy: NSLayoutRelation.equal, toItem: segmentBG, attribute: NSLayoutAttribute.centerX, multiplier: 1, constant: 0).isActive = true
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.topMargin, relatedBy: NSLayoutRelation.equal, toItem: segmentBG, attribute: NSLayoutAttribute.topMargin, multiplier: 1, constant: 7).isActive = true
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: 375).isActive = true
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: 44).isActive = true
   }
   
   internal func xmSegmentedControl(_ xmSegmentedControl: XMSegmentedControl, selectedSegment: Int) {
@@ -166,17 +172,10 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
   internal func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell = tasksTable.dequeueReusableCell(withIdentifier: "profileCell", for: indexPath) as! profileCell
     if tasks.count > 0 {
-      cell.taskLabel.text = tasks[indexPath.row].task
-      cell.dateLabel.text = tasks[indexPath.row].date
-      if tasks[indexPath.row].done == true {
-        tasksTable.selectRow(at: indexPath, animated: false, scrollPosition: UITableViewScrollPosition.none)
-        let view = UIImageView(image: UIImage(named: "checked"))
-        cell.accessoryView = view
-      } else {
-        tasksTable.deselectRow(at: indexPath, animated: false)
-        let view = UIImageView(image: UIImage(named: "check"))
-        cell.accessoryView = view
-      }
+      let task = tasks[indexPath.row]
+      cell.configProfileCell(task)
+      cell.checkTaskStatus(task: task, table: tableView, indexPath: indexPath)
+      
       let myID = myUser.userID
       if myID == myTeam.adminID {
         cell.deleteBtn.tag = indexPath.row
@@ -193,7 +192,7 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
   }
   
   fileprivate func updateCount(){
-    completedNumber.text = "\(completedTasks.count)"
+    completedNumber.text = "\(completedTasks)"
   }
   
   @IBAction func deleteTaskClicked(_ sender: UIButton) {
@@ -214,7 +213,7 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
   fileprivate func retrieveTasks() {
     Database.database().reference().child("Teams").child(selectedUser.teamID).child("UserTasks").child(selectedUser.userID).observeSingleEvent(of: .value) { (snapshot) in
       self.tasks = []
-      self.completedTasks = []
+      self.completedTasks = 0
       if let children = snapshot.children.allObjects as? [DataSnapshot] {
         for child in children {
           if let dict = child.value as? [String:AnyObject] {
@@ -222,8 +221,7 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
             self.tasks.append(task)
             self.tasksTable.reloadData()
             if task.done == true {
-              let taskIndex = 1
-              self.completedTasks.append(taskIndex)
+              self.completedTasks += 1
             }
             self.numberOfTasks.text = "\(self.tasks.count)"
             self.updateCount()
@@ -235,15 +233,15 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
   
   fileprivate func updateTasks() {
     let teamRef = Database.database().reference().child("Teams").child(myTeam.id)
-    teamRef.child("UserTasks").child(selectedUser.userID).observe(.value) { (snap) in
+    teamRef.child("UserTasks").child(selectedUser.userID).observe(.value) { _ in
       self.tasks = []
-      self.completedTasks = []
+      self.completedTasks = 0
       self.retrieveTasks()
       self.tasksTable.reloadData()
     }
-    teamRef.child("UserTasks").child(selectedUser.userID).observe(.childRemoved) { (snap) in
+    teamRef.child("UserTasks").child(selectedUser.userID).observe(.childRemoved) { _ in
       self.tasks = []
-      self.completedTasks = []
+      self.completedTasks = 0
       self.retrieveTasks()
       self.tasksTable.reloadData()
       self.numberOfTasks.text = "\(self.tasks.count)"

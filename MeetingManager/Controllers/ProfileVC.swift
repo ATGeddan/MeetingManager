@@ -14,6 +14,7 @@ import Kingfisher
 
 class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate,UITableViewDelegate,UITableViewDataSource,XMSegmentedControlDelegate {
   
+  @IBOutlet weak var segmentBG: UIImageView!
   @IBOutlet weak var taskPlaceHolder: UIView!
   @IBOutlet weak var tasksView: UIView!
   @IBOutlet weak var birthEdit: UITextField!
@@ -39,10 +40,10 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
   lazy var imagePicker = UIImagePickerController()
   
   var myTasks = [Task]()
-  var completedTasks = [Task]()
+  var completedTasks = 0
   
   var editingProfile = false
-  var segmentedControl3 = XMSegmentedControl()
+  var segmentedControl2 = XMSegmentedControl()
   
   var myUser = User()
   var myTeam = Team()
@@ -77,15 +78,20 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
   
   
   fileprivate func setupSegmentedController() {
-    segmentedControl3 = XMSegmentedControl(frame: CGRect(x: 0, y: 375, width: self.view.frame.width, height: 44), segmentTitle: ["Tasks", "Info"], selectedItemHighlightStyle: XMSelectedItemHighlightStyle.bottomEdge)
-    segmentedControl3.delegate = self
-    segmentedControl3.backgroundColor = UIColor.clear
-    segmentedControl3.highlightColor = UIColor(red: 192/255, green: 192/255, blue: 192/255, alpha: 1)
-    segmentedControl3.tint = UIColor(red: 220/255, green: 220/255, blue: 220/255, alpha: 0.7)
-    segmentedControl3.highlightTint = UIColor(red: 200/255, green: 200/255, blue: 200/255, alpha: 1)
-    segmentedControl3.addShadow(location: .top, color: UIColor.darkGray, opacity: 0.5, radius: 3.0)
+    segmentedControl2 = XMSegmentedControl(frame: CGRect(x: 0, y: 375, width: self.view.frame.width, height: 44), segmentTitle: ["Tasks", "Info"], selectedItemHighlightStyle: XMSelectedItemHighlightStyle.bottomEdge)
+    segmentedControl2.delegate = self
+    segmentedControl2.backgroundColor = UIColor.clear
+    segmentedControl2.highlightColor = UIColor(red: 192/255, green: 192/255, blue: 192/255, alpha: 1)
+    segmentedControl2.tint = UIColor(red: 220/255, green: 220/255, blue: 220/255, alpha: 0.7)
+    segmentedControl2.highlightTint = UIColor(red: 200/255, green: 200/255, blue: 200/255, alpha: 1)
+    segmentedControl2.addShadow(location: .top, color: UIColor.darkGray, opacity: 0.5, radius: 3.0)
     
-    self.view.addSubview(segmentedControl3)
+    self.view.addSubview(segmentedControl2)
+    segmentedControl2.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.centerX, relatedBy: NSLayoutRelation.equal, toItem: segmentBG, attribute: NSLayoutAttribute.centerX, multiplier: 1, constant: 0).isActive = true
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.topMargin, relatedBy: NSLayoutRelation.equal, toItem: segmentBG, attribute: NSLayoutAttribute.topMargin, multiplier: 1, constant: 7).isActive = true
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: 375).isActive = true
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: 44).isActive = true
   }
   
   internal func xmSegmentedControl(_ xmSegmentedControl: XMSegmentedControl, selectedSegment: Int) {
@@ -103,7 +109,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
   }
   
   fileprivate func updateCount(){
-    completedNumber.text = "\(completedTasks.count)"
+    completedNumber.text = "\(completedTasks)"
   }
   
   
@@ -128,7 +134,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
   fileprivate func retrieveTasks() {
     Database.database().reference().child("Teams").child(myUser.teamID).child("UserTasks").child(myUser.userID).observeSingleEvent(of: .value) { (snapshot) in
       self.myTasks = []
-      self.completedTasks = []
+      self.completedTasks = 0
       Database.database().reference().child("Teams").child(self.myUser.teamID).child("NewTasks").child(self.myUser.userID).removeValue()
       if let children = snapshot.children.allObjects as? [DataSnapshot] {
         for child in children {
@@ -137,7 +143,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             self.myTasks.append(task)
             self.taskTableView.reloadData()
             if task.done == true {
-              self.completedTasks.append(task)
+              self.completedTasks += 1
             }
             self.taskNumber.text = "\(self.myTasks.count)"
             self.updateCount()
@@ -150,13 +156,13 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
   fileprivate func updateTasks() {
     Database.database().reference().child("Teams").child(myUser.teamID).child("UserTasks").child(myUser.userID).observe(.childAdded) { (snap) in
       self.myTasks = []
-      self.completedTasks = []
+      self.completedTasks = 0
       self.retrieveTasks()
       self.taskTableView.reloadData()
     }
     Database.database().reference().child("Teams").child(myUser.teamID).child("UserTasks").child(myUser.userID).observe(.childRemoved) { (snap) in
       self.myTasks = []
-      self.completedTasks = []
+      self.completedTasks = 0
       self.retrieveTasks()
       self.taskTableView.reloadData()
       self.taskNumber.text = "\(self.myTasks.count)"
@@ -180,17 +186,9 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     
     let cell = taskTableView.dequeueReusableCell(withIdentifier: "myprofileCell", for: indexPath) as! profileCell
     if myTasks.count > 0 {
-      cell.taskLabel.text = myTasks[indexPath.row].task
-      cell.dateLabel.text = myTasks[indexPath.row].date
-      if myTasks[indexPath.row].done == true {
-        taskTableView.selectRow(at: indexPath, animated: false, scrollPosition: UITableViewScrollPosition.none)
-        let view = UIImageView(image: UIImage(named: "checked"))
-        cell.accessoryView = view
-      } else {
-        taskTableView.deselectRow(at: indexPath, animated: false)
-        let view = UIImageView(image: UIImage(named: "check"))
-        cell.accessoryView = view
-      }
+      let theTask = myTasks[indexPath.row]
+      cell.configProfileCell(theTask)
+      cell.checkTaskStatus(task: theTask, table: tableView, indexPath: indexPath)
       updateCount()
     }
     return cell
@@ -208,7 +206,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         let currentTask = myTasks[indexPath.row]
         currentTask.clickTask()
         let adjustment = ["done" : false]
-        completedTasks.remove(at: 0)
+        completedTasks -= 1
         updateCount()
         Database.database().reference().child("Teams").child(myUser.teamID).child("UserTasks").child(myUser.userID).child(currentTask.ID).updateChildValues(adjustment)
       }
@@ -222,7 +220,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         let currentTask = myTasks[indexPath.row]
         currentTask.clickTask()
         let adjustment = ["done" : true]
-        completedTasks.append(currentTask)
+        completedTasks += 1
         updateCount()
         Database.database().reference().child("Teams").child(myUser.teamID).child("UserTasks").child(myUser.userID).child(currentTask.ID).updateChildValues(adjustment)
       }

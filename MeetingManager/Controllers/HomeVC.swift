@@ -85,7 +85,8 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   internal func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     
     let cell = tableView.dequeueReusableCell(withIdentifier: "homeCell", for: indexPath) as? homeCell
-    cell?.updatehomeCell(date: meetings[indexPath.row].meetingDate, place: meetings[indexPath.row].meetingPlace, city: meetings[indexPath.row].meetingCity)
+    let meeting = meetings[indexPath.row]
+    cell?.updatehomeCell(meeting)
     cell?.cellBubble.addShadow(location: .bottom, color: UIColor.black, opacity: 0.3, radius: 0.5)
     return cell!
   }
@@ -97,14 +98,6 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   internal func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     let meetingmodel = meetings[indexPath.row]
     performSegue(withIdentifier: "toMeeting", sender: meetingmodel)
-  }
-  
-  // --------------------------------------------------------------
-  fileprivate func hideNavBar() {
-    self.navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
-    self.navigationController?.navigationBar.shadowImage = UIImage()
-    self.navigationController?.navigationBar.isTranslucent = true
-    self.navigationController?.view.backgroundColor = .clear
   }
   
   
@@ -148,7 +141,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     Database.database().reference().child("Users").child(myUser.userID).observe(.value) { (snapshot) in
       if let dicts = snapshot.value as? [String:AnyObject] {
         self.myUser.updateUser(data: dicts)
-        if self.myUser.teamID != "" && self.myUser.teamID != nil {
+        if self.myUser.teamID != "" {
           let image = URL(string: self.myUser.imageURL)
           self.sideImage.kf.setImage(with: image)
           self.sideName.text = self.myUser.userFirstName + " " + self.myUser.userLastName
@@ -243,7 +236,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
       }
     }
     
-    ref.child(myUser.userID).observe(.childRemoved) { (snap) in
+    ref.child(myUser.userID).observe(.childRemoved) { _ in
       self.nextMeetingSeen = true
       self.checkNotifToggle()
       self.notifBubble3.isHidden = true
@@ -416,7 +409,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
             if let photoID = photosDict["id"] as? String {
               Storage.storage().reference().child("Teams").child(teamid).child("meetingPhotos").child(photoID).delete(completion: { (error) in
                 if error != nil {
-                  print(error!)
+                  print(error!.localizedDescription)
                 }
               })
             }
@@ -476,7 +469,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     do {
       try Auth.auth().signOut()
     } catch {
-      print(error)
+      print(error.localizedDescription)
     }
     performSegue(withIdentifier: "toLogin", sender: self)
   }

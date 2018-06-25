@@ -71,7 +71,7 @@ class CreateTeamVC: UIViewController,UITextFieldDelegate {
             SVProgressHUD.dismiss()
             self.performSegue(withIdentifier: "created", sender: self.myUser)
           } else {
-            print(err!)
+            print(err!.localizedDescription)
           }
         }
       } else { // pass error msg
@@ -135,12 +135,6 @@ class CreateTeamVC: UIViewController,UITextFieldDelegate {
         correctImg.isHidden = true
       }
     }
-  }
-  
-  fileprivate func displayBasicAlert(title:String,msg:String) {
-    let alert = UIAlertController(title: title, message: msg, preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: "Got it", style: .default, handler: nil))
-    self.present(alert,animated: true,completion: nil)
   }
   
   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

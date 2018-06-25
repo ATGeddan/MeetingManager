@@ -26,7 +26,7 @@ class WelcomeVC: UIViewController {
       try Auth.auth().signOut()
       performSegue(withIdentifier: "signedOut", sender: nil)
     } catch {
-      print(error)
+      print(error.localizedDescription)
     }
     
   }
@@ -73,12 +73,7 @@ class WelcomeVC: UIViewController {
       }
     }
   }
-  
-  fileprivate func displayBasicAlert(title:String,msg:String) {
-    let alert = UIAlertController(title: title, message: msg, preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: "Got it", style: .default, handler: nil))
-    self.present(alert,animated: true,completion: nil)
-  }
+
   
   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
     teamName.text = ""

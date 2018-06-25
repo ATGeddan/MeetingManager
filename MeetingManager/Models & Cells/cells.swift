@@ -22,7 +22,7 @@ class membersCell: UITableViewCell {
     cellImage.layer.cornerRadius = cellImage.frame.size.width / 2
   }
   
-  func updateUI(user:User,team:Team) {
+  func configMemberCell(user:User,team:Team) {
     self.cellName.text = user.userFirstName + " " + user.userLastName
     let url = URL(string: user.imageURL)
     self.cellImage.kf.setImage(with: url)
@@ -45,6 +45,16 @@ class commentCell: UITableViewCell {
   @IBOutlet weak var taskBody: UILabel!
   @IBOutlet weak var userName: UILabel!
   
+  func configCommentCell(_ thisComment: Comment) {
+    let imageurl = URL(string: thisComment.imageURL)
+    commentThumb.kf.setImage(with: imageurl)
+    commentThumb.layer.cornerRadius = 24.5
+    commentThumb.layer.borderWidth = 1
+    commentThumb.layer.borderColor = UIColor.lightGray.cgColor
+    commentName.text = thisComment.name
+    commentTime.text = thisComment.time
+    commentBody.text = thisComment.body
+  }
 }
 
 class profileCell: UITableViewCell {
@@ -52,6 +62,25 @@ class profileCell: UITableViewCell {
   @IBOutlet weak var taskLabel: UILabel!
   @IBOutlet weak var cellbackGround: UIView!
   @IBOutlet weak var dateLabel: UILabel!
+  
+  func configProfileCell(_ task: Task) {
+    taskLabel.text = task.task
+    dateLabel.text = task.date
+  }
+  
+  func checkTaskStatus(task:Task,table:UITableView,indexPath:IndexPath) {
+    if task.done == true {
+      table.selectRow(at: indexPath, animated: false, scrollPosition: UITableViewScrollPosition.none)
+      let view = UIImageView(image: UIImage(named: "checked"))
+      self.accessoryView = view
+    } else {
+      table.deselectRow(at: indexPath, animated: false)
+      let view = UIImageView(image: UIImage(named: "check"))
+      self.accessoryView = view
+    }
+    
+  }
+  
 }
 
 class homeCell: UITableViewCell {
@@ -60,11 +89,11 @@ class homeCell: UITableViewCell {
   @IBOutlet weak var placeLabel: UILabel!
   @IBOutlet weak var cityLabel: UILabel!
   
-  func updatehomeCell(date:String,place:String,city:String) {
+  func updatehomeCell(_ meeting:MeetingModel) {
     cellBubble.layer.cornerRadius = 5
-    dateLabel.text = date
-    placeLabel.text = place + " ,"
-    cityLabel.text = city
+    dateLabel.text = meeting.meetingDate
+    placeLabel.text = meeting.meetingPlace + " ,"
+    cityLabel.text = meeting.meetingCity
   }
 }
 

@@ -40,7 +40,9 @@ extension UIView {
     self.layer.shadowRadius = radius
   }
 }
-// _____________
+
+// ______________________________________________________________________________
+
 extension UIImageView {
   override open func awakeFromNib() {
     super.awakeFromNib()
@@ -48,3 +50,21 @@ extension UIImageView {
   }
 }
 
+// ______________________________________________________________________________
+
+extension UIViewController {
+  
+  func displayBasicAlert(title:String,msg:String) {
+    let alert = UIAlertController(title: title, message: msg, preferredStyle: .alert)
+    alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+    present(alert,animated: true,completion: nil)
+  }
+  
+  func hideNavBar() {
+    navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
+    navigationController?.navigationBar.shadowImage = UIImage()
+    navigationController?.navigationBar.isTranslucent = true
+    navigationController?.view.backgroundColor = .clear
+  }
+  
+}

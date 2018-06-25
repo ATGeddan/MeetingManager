@@ -82,7 +82,7 @@ class MeetingAddVC: UIViewController,UITextViewDelegate {
                                        "teamAdmin":myTeam.adminID]
     databaseRef.setValue(dictionary) { (error, ref) in
       if error != nil {
-        print(error!)
+        print(error!.localizedDescription)
       } else {
         SVProgressHUD.dismiss()
         self.performSegue(withIdentifier: "doneCreating", sender: newMeeting)

@@ -10,7 +10,7 @@ import UIKit
 import Firebase
 import Kingfisher
 
-class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSource, changeAdminDelegate, didRemoveMemberDelegate {
+class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSource, adminActions {
   
   @IBOutlet weak var membersTableView: UITableView!
   
@@ -39,7 +39,7 @@ class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSourc
   internal func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell = tableView.dequeueReusableCell(withIdentifier: "membersCell", for: indexPath) as! membersCell
     let user = users[indexPath.row]
-    cell.updateUI(user:user,team:myTeam)
+    cell.configMemberCell(user:user,team:myTeam)
     return cell
   }
   
@@ -52,12 +52,12 @@ class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSourc
     performSegue(withIdentifier: "showProfile", sender: selectedUser)
   }
   
-  internal func didChangeAdmin(id:String) {
+  func didChangeAdmin(id:String) {
     myTeam.updateAdmin(id: id)
     membersTableView.reloadData()
   }
   
-  internal func didRemoveMember() {
+  func didRemoveMember() {
     users = []
     getUsers()
     membersTableView.reloadData()
@@ -99,12 +99,12 @@ class UsersTableVC: UIViewController, UITableViewDelegate , UITableViewDataSourc
   
   fileprivate func updateUsers() {
     guard let teamid = myUser.teamID else {return}
-    Database.database().reference().child("Teams").child(teamid).child("Members").observe(.childAdded) { (snapshot) in
+    Database.database().reference().child("Teams").child(teamid).child("Members").observe(.childAdded) { _ in
       self.users = []
       self.getUsers()
       self.membersTableView.reloadData()
     }
-    Database.database().reference().child("Teams").child(teamid).child("Members").observe(.childRemoved) { (snapshot) in
+    Database.database().reference().child("Teams").child(teamid).child("Members").observe(.childRemoved) { _ in
       self.users = []
       self.getUsers()
       self.membersTableView.reloadData()

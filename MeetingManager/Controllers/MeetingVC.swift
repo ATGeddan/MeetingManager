@@ -14,6 +14,7 @@ import Kingfisher
 
 class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate,UITableViewDelegate,UITableViewDataSource,UITextFieldDelegate,UITextViewDelegate,XMSegmentedControlDelegate {
   
+  @IBOutlet weak var segmentBG: UIImageView!
   @IBOutlet weak var commentstableView: UITableView!
   @IBOutlet weak var commentsView: UIView!
   @IBOutlet weak var tasksView: UIView!
@@ -73,7 +74,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
   fileprivate func addSegmentedController() {
     let titles = ["Comments", "Tasks", "Attachments"]
     let icons = [UIImage(named: "icon1")!, UIImage(named: "icon2")!, UIImage(named: "icon3")!]
-    let frame = CGRect(x: 0, y: 309, width: self.view.frame.width, height: 44)
+    let frame = CGRect(x: 0, y: 329, width: self.view.frame.width, height: 44)
     let segmentedControl2 = XMSegmentedControl(frame: frame, segmentContent: (titles, icons), selectedItemHighlightStyle: XMSelectedItemHighlightStyle.bottomEdge)
     segmentedControl2.delegate = self
     segmentedControl2.backgroundColor = UIColor.clear
@@ -82,6 +83,11 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     segmentedControl2.highlightTint = UIColor(red: 200/255, green: 200/255, blue: 200/255, alpha: 1)
     segmentedControl2.addShadow(location: .top, color: UIColor.black, opacity: 0.5, radius: 3.0)
     self.view.addSubview(segmentedControl2)
+    segmentedControl2.translatesAutoresizingMaskIntoConstraints = false
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.centerX, relatedBy: NSLayoutRelation.equal, toItem: segmentBG, attribute: NSLayoutAttribute.centerX, multiplier: 1, constant: 0).isActive = true
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.topMargin, relatedBy: NSLayoutRelation.equal, toItem: segmentBG, attribute: NSLayoutAttribute.topMargin, multiplier: 1, constant: 7).isActive = true
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: 375).isActive = true
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: 44).isActive = true
   }
   
   internal func xmSegmentedControl(_ xmSegmentedControl: XMSegmentedControl, selectedSegment: Int) {
@@ -195,6 +201,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
       notesText.isEditable = true
     } else {
       editingOn = false
+      view.endEditing(true)
       deleteButton.isHidden = true
       dateField.isHidden = true
       placeField.isHidden = true
@@ -227,7 +234,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     for i in 0..<allImages.count {
       Storage.storage().reference().child("Teams").child(currentMeeting.teamID).child("meetingPhotos").child(currentMeeting.meetingID).child(allImages[i].ID).delete { (error) in
         if error != nil {
-          print(error!)
+          print(error!.localizedDescription)
         }
       }
     }
@@ -236,7 +243,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     meetingRef.child("MeetingLinks").child(currentMeeting.meetingID).removeValue()
     meetingRef.child("MeetingPhotos").child(currentMeeting.meetingID).removeValue { (error, ref) in
       if error != nil {
-        print(error!)
+        print(error!.localizedDescription)
       }
       self.navigationController?.popToRootViewController(animated: true)
     }
@@ -334,7 +341,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     meetingRef.child("photosRef").child(id).removeValue()
     Storage.storage().reference().child("Teams").child(currentMeeting.teamID).child("meetingPhotos").child(id).delete { (err) in
       if err != nil {
-        print(err!)
+        print(err!.localizedDescription)
       }
     }
   }
@@ -520,15 +527,12 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
   
   fileprivate func deleteLinkTriggered(_ sender:UIButton) {
     let ref = Database.database().reference().child("Teams").child(myUser.teamID).child("MeetingLinks").child(currentMeeting.meetingID)
-    ref.child(links[sender.tag - 1].ID).removeValue { (err, ref) in
-      if err == nil {
-        for view in self.linksTexts.subviews {
-          if view.tag != 0 {
-            view.removeFromSuperview()
-          }
-        }
+    for view in self.linksTexts.subviews {
+      if view.tag != 0 {
+        view.removeFromSuperview()
       }
     }
+    ref.child(links[sender.tag - 1].ID).removeValue()
     
   }
   
@@ -573,16 +577,10 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
       cell = tableView.dequeueReusableCell(withIdentifier: "commentCell", for: indexPath) as! commentCell
       if comments.count > 0 {
         let thisComment = comments[indexPath.row]
-        let imageurl = URL(string: thisComment.imageURL)
-        cell.commentThumb.kf.setImage(with: imageurl)
-        cell.commentThumb.layer.cornerRadius = 24.5
-        cell.commentThumb.layer.borderWidth = 1
-        cell.commentThumb.layer.borderColor = UIColor.lightGray.cgColor
-        cell.commentName.text = thisComment.name
-        cell.commentTime.text = thisComment.time
-        cell.commentBody.text = thisComment.body
+        cell.configCommentCell(thisComment)
+        
         let myID = myUser.userID
-        if myID == currentMeeting.meetingAdmin || myID == currentMeeting.teamAdmin || myID == comments[indexPath.row].userID {
+        if myID == currentMeeting.meetingAdmin || myID == currentMeeting.teamAdmin || myID == thisComment.userID {
           cell.deleteBtn.tag = indexPath.row
           cell.deleteBtn.isHidden = false
         }
@@ -656,7 +654,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         "imageURL": myUser.imageURL]
       meetingRef.child("Comments").child(currentMeeting.meetingID).child("\(autoID)").setValue(commentDict) { (error, ref) in
         if error != nil {
-          print(error!)
+          print(error!.localizedDescription)
         } else {
           self.commentField.text = ""
           self.commentField.isEnabled = true
@@ -721,36 +719,37 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
   var addingTask = false
   var tasks = [Task]()
   @IBOutlet weak var taskTableView: UITableView!
-  @IBOutlet weak var taskTableHeight: NSLayoutConstraint!
   @IBOutlet weak var addTaskButton: UIButton!
   @IBOutlet weak var userstableView: UITableView!
   var users = [User]()
   var chosenUsers = [String]()
   
   @IBOutlet weak var taskPlaceHolder: UIView!
+  @IBOutlet weak var viewOfTaskTable: UIView!
   
   @IBAction func addClicked(_ sender: UIButton) {
     if addingTask == false { // First it unchecks the old selected users
-      guard let selectedItems = userstableView.indexPathsForSelectedRows else {return}
-      self.chosenUsers = []
-      for x in selectedItems {
-        userstableView.deselectRow(at: x, animated: true)
-        if let cell = userstableView.cellForRow(at: x) {
-          let view = UIImageView(image: UIImage(named: "check"))
-          cell.accessoryView = view
+      let selectedItems = userstableView.indexPathsForSelectedRows
+      if selectedItems != nil {
+        self.chosenUsers = []
+        for x in selectedItems! {
+          userstableView.deselectRow(at: x, animated: true)
+          if let cell = userstableView.cellForRow(at: x) {
+            let view = UIImageView(image: UIImage(named: "check"))
+            cell.accessoryView = view
+          }
         }
-      } // Show users and text field
+      }// Show users and text field
       addingTask = true
       UIView.animate(withDuration: 0.25) {
-        self.taskTableHeight.constant = 1
+        self.viewOfTaskTable.alpha = 0
         self.view.layoutIfNeeded()
       }
-      
     } else if addingTask == true { // if a task is added
       if taskField.text != "" && chosenUsers != [] {
         addTaskButton.isEnabled = false
         UIView.animate(withDuration: 0.25) {
-          self.taskTableHeight.constant = 270
+          self.viewOfTaskTable.alpha = 1
           self.view.layoutIfNeeded()
         }
         let timestamp = DateFormatter.localizedString(from: NSDate() as Date, dateStyle: .medium, timeStyle: .none)
@@ -763,7 +762,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
           let databaseREF = meetingRef.child("UserTasks").child(chosenUsers[x]).child(newID)
           databaseREF.setValue(taskDict) { (error, ref) in
             if error != nil {
-              print(error!)
+              print(error!.localizedDescription)
             }
             self.addingTask = false
             self.taskField.text = ""
@@ -773,7 +772,7 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
       } else { // if add was clicked to close, not add
         addingTask = false
         UIView.animate(withDuration: 0.25) {
-          self.taskTableHeight.constant = 270
+          self.viewOfTaskTable.alpha = 1
           self.view.layoutIfNeeded()
         }
       }
@@ -796,12 +795,12 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
   }
   
   fileprivate func updateTasks() {
-    meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).observe(.childRemoved) { (snapshot) in
+    meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).observe(.childRemoved) { _ in
       self.tasks = []
       self.retrieveTasks()
       self.taskTableView.reloadData()
     }
-    meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).observe(.childAdded) { (snapshot) in
+    meetingRef.child("MeetingTasks").child(currentMeeting.meetingID).observe(.childAdded) { _ in
       self.tasks = []
       self.retrieveTasks()
       self.taskTableView.reloadData()

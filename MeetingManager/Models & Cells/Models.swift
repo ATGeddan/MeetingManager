@@ -22,41 +22,41 @@ class User {
   var teamID:String!
   
   var userEmail:String {
-    return _userEmail
+    return _userEmail ?? ""
   }
   var userFirstName:String {
-    return _userFirstName
+    return _userFirstName ?? ""
   }
   var userLastName:String {
-    return _userLastName
+    return _userLastName ?? ""
   }
   var userCity:String {
-    return _userCity
+    return _userCity ?? ""
   }
   var userID:String {
-    return _userID
+    return _userID ?? ""
   }
   var imageURL:String {
-    return _imageURL
+    return _imageURL ?? ""
   }
   var position:String {
-    return _position
+    return _position ?? ""
   }
   var phone:String {
-    return _phone
+    return _phone ?? ""
   }
   var country:String {
-    return _country
+    return _country ?? ""
   }
   var birth:String {
-    return _birth
+    return _birth ?? ""
   }
   
   
   init() {
   }
   
-  convenience init(data:Dictionary<String,AnyObject>) {
+  convenience init(data:[String:AnyObject]) {
     self.init()
     if let email = data["email"] as? String {
       _userEmail = email
@@ -93,7 +93,7 @@ class User {
     }
   }
   
-  func updateUser(data:Dictionary<String,AnyObject>) {
+  func updateUser(data:[String:AnyObject]) {
     
     if let email = data["email"] as? String {
       _userEmail = email
@@ -147,33 +147,33 @@ class Team {
   private var _adminName:String!
   
   var name:String {
-    return _name
+    return _name ?? ""
   }
   var id:String {
-    return _id
+    return _id ?? ""
   }
   var country:String {
-    return _country
+    return _country ?? ""
   }
   var organization:String {
-    return _organization
+    return _organization ?? ""
   }
   var info:String {
-    return _info
+    return _info ?? ""
   }
   var pass:String {
-    return _pass
+    return _pass ?? ""
   }
   var adminID:String {
-    return _adminID
+    return _adminID ?? ""
   }
   var adminName:String {
-    return _adminName
+    return _adminName ?? ""
   }
   
   init() {}
   
-  convenience init(data:Dictionary<String,AnyObject>) {
+  convenience init(data:[String:AnyObject]) {
     self.init()
     
     if let name = data["name"] as? String {
@@ -232,40 +232,40 @@ class MeetingModel {
   private var _seen:String!
   
   var meetingDate:String {
-    return _meetingDate
+    return _meetingDate ?? ""
   }
   var meetingPlace:String {
-    return _meetingPlace
+    return _meetingPlace ?? ""
   }
   var meetingCity:String {
-    return _meetingCity
+    return _meetingCity ?? ""
   }
   var meetingNotes:String {
-    return _meetingNotes
+    return _meetingNotes ?? ""
   }
   var meetingID:String {
-    return _meetingID
+    return _meetingID ?? ""
   }
   var teamID:String {
-    return _teamID
+    return _teamID ?? ""
   }
   var meetingAdmin:String {
-    return _meetingAdmin
+    return _meetingAdmin ?? ""
   }
   var teamAdmin:String {
-    return _teamAdmin
+    return _teamAdmin ?? ""
   }
   var formatDate:String {
-    return _formatDate
+    return _formatDate ?? ""
   }
   var seen:String {
-    return _seen
+    return _seen ?? ""
   }
   
   init() {
   }
   
-  convenience init(data:Dictionary<String,AnyObject>) {
+  convenience init(data:[String:AnyObject]) {
     self.init()
     if let date = data["date"] as? String {
       _meetingDate = date
@@ -311,25 +311,25 @@ class Comment {
   private var _userID:String!
   
   var imageURL:String {
-    return _imageURL
+    return _imageURL ?? ""
   }
   var name:String {
-    return _name
+    return _name ?? ""
   }
   var time:String {
-    return _time
+    return _time ?? ""
   }
   var body:String {
-    return _body
+    return _body ?? ""
   }
   var ID:String {
-    return _ID
+    return _ID ?? ""
   }
   var userID:String {
-    return _userID
+    return _userID ?? ""
   }
   
-  init(data:Dictionary<String,AnyObject>) {
+  init(data:[String:AnyObject]) {
     if let imageURL = data["imageURL"] as? String {
       _imageURL = imageURL
     }
@@ -359,19 +359,19 @@ class Task {
   private var _date:String!
   
   var task:String {
-    return _task
+    return _task ?? ""
   }
   var done:Bool {
     return _done
   }
   var ID:String{
-    return _ID
+    return _ID ?? ""
   }
   var date:String{
-    return _date
+    return _date ?? ""
   }
   
-  init(data:Dictionary<String,AnyObject>) {
+  init(data:[String:AnyObject]) {
     if let task2 = data["task"] as? String {
       _task = task2
     }
@@ -402,17 +402,17 @@ class ImageModel {
   private var _uploaderName:String!
   
   var url:String {
-    return _url
+    return _url ?? ""
   }
   
   var ID:String {
-    return _ID
+    return _ID ?? ""
   }
   var uploaderName:String {
-    return _uploaderName
+    return _uploaderName ?? ""
   }
   
-  init(data:Dictionary<String,AnyObject>) {
+  init(data:[String:AnyObject]) {
     if let url2 = data["url"] as? String {
       _url = url2
     }
@@ -435,20 +435,20 @@ class LinkModel {
   private var _ID:String!
   
   var url:String {
-    return _url
+    return _url ?? ""
   }
   
   var title:String {
-    return _title
+    return _title ?? ""
   }
   var uploaderID:String {
-    return _uploaderID
+    return _uploaderID ?? ""
   }
   var ID:String {
-    return _ID
+    return _ID ?? ""
   }
   
-  init(data:Dictionary<String,AnyObject>) {
+  init(data:[String:AnyObject]) {
     if let url = data["url"] as? String {
       _url = url
     }

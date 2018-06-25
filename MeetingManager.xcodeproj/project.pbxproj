@@ -23,7 +23,7 @@
 		26D3F6E820BE03100072FA38 /* ProfileVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6DE20BE030F0072FA38 /* ProfileVC.swift */; };
 		26D3F6E920BE03100072FA38 /* RegisterVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6DF20BE030F0072FA38 /* RegisterVC.swift */; };
 		26D3F6EA20BE03100072FA38 /* MeetingAddVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6E020BE03100072FA38 /* MeetingAddVC.swift */; };
-		26D3F6EF20BE03540072FA38 /* Shadow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6EC20BE03530072FA38 /* Shadow.swift */; };
+		26D3F6EF20BE03540072FA38 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6EC20BE03530072FA38 /* Extensions.swift */; };
 		26D3F6F020BE03540072FA38 /* SLImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6ED20BE03530072FA38 /* SLImageView.swift */; };
 		26D3F6F120BE03540072FA38 /* XMSegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6EE20BE03530072FA38 /* XMSegmentedControl.swift */; };
 		26D3F6F520BE03670072FA38 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6F320BE03660072FA38 /* Models.swift */; };
@@ -53,7 +53,7 @@
 		26D3F6DE20BE030F0072FA38 /* ProfileVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileVC.swift; sourceTree = "<group>"; };
 		26D3F6DF20BE030F0072FA38 /* RegisterVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RegisterVC.swift; sourceTree = "<group>"; };
 		26D3F6E020BE03100072FA38 /* MeetingAddVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeetingAddVC.swift; sourceTree = "<group>"; };
-		26D3F6EC20BE03530072FA38 /* Shadow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Shadow.swift; sourceTree = "<group>"; };
+		26D3F6EC20BE03530072FA38 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		26D3F6ED20BE03530072FA38 /* SLImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SLImageView.swift; sourceTree = "<group>"; };
 		26D3F6EE20BE03530072FA38 /* XMSegmentedControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XMSegmentedControl.swift; sourceTree = "<group>"; };
 		26D3F6F320BE03660072FA38 /* Models.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
@@ -138,7 +138,7 @@
 		26D3F6EB20BE03410072FA38 /* Libraries & Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				26D3F6EC20BE03530072FA38 /* Shadow.swift */,
+				26D3F6EC20BE03530072FA38 /* Extensions.swift */,
 				26D3F6ED20BE03530072FA38 /* SLImageView.swift */,
 				26D3F6EE20BE03530072FA38 /* XMSegmentedControl.swift */,
 			);
@@ -312,7 +312,7 @@
 				26D3F6E520BE03100072FA38 /* CreateTeamVC.swift in Sources */,
 				26D3F6F620BE03670072FA38 /* cells.swift in Sources */,
 				26D3F6C520BE02960072FA38 /* AppDelegate.swift in Sources */,
-				26D3F6EF20BE03540072FA38 /* Shadow.swift in Sources */,
+				26D3F6EF20BE03540072FA38 /* Extensions.swift in Sources */,
 				26D3F6E320BE03100072FA38 /* LoginVC.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -15,3 +15,5 @@ protocol changeAdminDelegate {
 protocol didRemoveMemberDelegate {
   func didRemoveMember()
 }
+
+protocol adminActions: changeAdminDelegate, didRemoveMemberDelegate {}

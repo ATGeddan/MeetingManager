@@ -19,7 +19,8 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
   @IBOutlet weak var passField: UITextField!
   @IBOutlet weak var firstField: UITextField!
   @IBOutlet weak var lastField: UITextField!
-  let picker = UIDatePicker()
+  
+  lazy var picker = UIDatePicker()
   var myUser = User()
   
   override func viewDidLoad() {
@@ -36,7 +37,7 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
   }
   
   internal func textFieldDidEndEditing(_ textField: UITextField) {
-    if passField.text != "", confirmField.text == passField.text {
+    if passField.text != "" && confirmField.text == passField.text {
       correct.isHidden = false
       wrong.isHidden = true
     } else {
@@ -94,12 +95,12 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
                                              "birth":birthField.text!,
                                              "country":"",
                                              "phone":""]
-    let user = User(data: userDictionary as Dictionary<String, AnyObject>)
+    let user = User(data: userDictionary as [String:AnyObject])
     myUser = user
     userDB.child(uid).setValue(userDictionary){
       (error, reference) in
       if error != nil {
-        print(error!)
+        print(error!.localizedDescription)
       }
     }
     
@@ -126,11 +127,7 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
     self.view.endEditing(true)
   }
   
-  fileprivate func displayBasicAlert(title:String,msg:String) {
-    let alert = UIAlertController(title: title, message: msg, preferredStyle: .alert)
-    alert.addAction(UIAlertAction(title: "Got it", style: .default, handler: nil))
-    self.present(alert,animated: true,completion: nil)
-  }
+
   
   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
     if let des = segue.destination as? WelcomeVC, let user = sender as? User {

@@ -11,9 +11,10 @@ import Firebase
 
 class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource {
   
+  @IBOutlet weak var membersView: UIView!
   @IBOutlet weak var membersBtn: UIButton!
   @IBOutlet weak var allMemberBtn: UIButton!
-  @IBOutlet weak var tableBottom: NSLayoutConstraint!
+  @IBOutlet weak var tableLeading: NSLayoutConstraint!
   @IBOutlet weak var userTableView: UITableView!
   @IBOutlet weak var cityField: UITextField!
   @IBOutlet weak var placeField: UITextField!
@@ -37,9 +38,10 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
   
   @IBAction func allPressed(_ sender: UIButton) {
     self.view.endEditing(true)
-    if tableBottom.constant == 0 {
+    if tableLeading.constant == 0 {
       UIView.animate(withDuration: 0.3) {
-        self.tableBottom.constant = 288
+        self.tableLeading.constant = -377
+        self.membersView.alpha = 0
         self.view.layoutIfNeeded()
       }
     }
@@ -54,7 +56,7 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
   
   @IBAction func specificPressed(_ sender: UIButton) {
     self.view.endEditing(true)
-    if tableBottom.constant == 288 {
+    if tableLeading.constant == -377 {
       allMemberBtn.setImage(UIImage(named: "buttonOff"), for: .normal)
       membersBtn.setImage(UIImage(named: "buttonOn"), for: .normal)
       self.chosenUsers = []
@@ -70,7 +72,8 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
       }
       
       UIView.animate(withDuration: 0.3) {
-        self.tableBottom.constant = 0
+        self.tableLeading.constant = 0
+        self.membersView.alpha = 1
         self.view.layoutIfNeeded()
       }
     }
@@ -112,7 +115,8 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
   }
   
   fileprivate func getUsers() {
-    tableBottom.constant = 288
+    membersView.alpha = 0
+    tableLeading.constant = -377
     let teamRef = Database.database().reference().child("Teams").child(myUser.teamID).child("Members")
     teamRef.observe(.childAdded) { (snapshot) in
       if let dictionary0 = snapshot.value as? [String:AnyObject] {
