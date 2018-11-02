@@ -1,6 +1,6 @@
 //
-//  cell1.swift
-//  TEDxMeet
+//  cells.swift
+//  MeetingManager
 //
 //  Created by Ahmed Eltabbal on 5/13/18.
 //  Copyright © 2018 Ahmed Eltabbal. All rights reserved.
@@ -14,6 +14,8 @@ class membersCell: UITableViewCell {
   @IBOutlet weak var cellPosition: UILabel!
   @IBOutlet weak var cellBack: UIView!
   @IBOutlet weak var adminBadge: UIImageView!
+  @IBOutlet weak var confirmBtn: UIButton!
+  @IBOutlet weak var declineBtn: UIButton!
   
   override func awakeFromNib() {
     super.awakeFromNib()
@@ -32,6 +34,18 @@ class membersCell: UITableViewCell {
     } else {
       self.adminBadge.isHidden = true
     }
+  }
+  
+  func showBTNs(_ row:Int) {
+    confirmBtn.isHidden = false
+    declineBtn.isHidden = false
+    confirmBtn.tag = row
+    declineBtn.tag = row
+  }
+  
+  func hideBTNs() {
+    confirmBtn.isHidden = true
+    declineBtn.isHidden = true
   }
 }
 
@@ -69,8 +83,8 @@ class profileCell: UITableViewCell {
   }
   
   func checkTaskStatus(task:Task,table:UITableView,indexPath:IndexPath) {
-    if task.done == true {
-      table.selectRow(at: indexPath, animated: false, scrollPosition: UITableViewScrollPosition.none)
+    if task.done {
+      table.selectRow(at: indexPath, animated: false, scrollPosition: UITableView.ScrollPosition.none)
       let view = UIImageView(image: UIImage(named: "checked"))
       self.accessoryView = view
     } else {

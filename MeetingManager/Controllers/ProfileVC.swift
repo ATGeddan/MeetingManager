@@ -1,6 +1,6 @@
 //
 //  ProfileVC.swift
-//  TEDxMeet
+//  MeetingManager
 //
 //  Created by Ahmed Eltabbal on 5/13/18.
 //  Copyright © 2018 Ahmed Eltabbal. All rights reserved.
@@ -14,6 +14,8 @@ import Kingfisher
 
 class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate,UITableViewDelegate,UITableViewDataSource,XMSegmentedControlDelegate {
   
+  @IBOutlet weak var backBtnNoTeam: UIButton!
+  @IBOutlet weak var editBtnNoTeam: UIButton!
   @IBOutlet weak var segmentBG: UIImageView!
   @IBOutlet weak var taskPlaceHolder: UIView!
   @IBOutlet weak var tasksView: UIView!
@@ -43,6 +45,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
   var completedTasks = 0
   
   var editingProfile = false
+  var joinedTeam = true
   var segmentedControl2 = XMSegmentedControl()
   
   var myUser = User()
@@ -61,19 +64,29 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
   
   override func viewDidAppear(_ animated: Bool) {
     super.viewDidAppear(true)
-    Database.database().reference().child("Teams").child(myUser.teamID).child("NewTasks").child(myUser.userID).removeValue()
-    updateTasks()
+    if joinedTeam {
+      backBtnNoTeam.isHidden = true
+      editBtnNoTeam.isHidden = true
+      Database.database().reference().child("Teams").child(myUser.teamID).child("NewTasks").child(myUser.userID).removeValue()
+      updateTasks()
+    } else {
+      backBtnNoTeam.isHidden = false
+      editBtnNoTeam.isHidden = false
+    }
   }
   
   override func viewDidDisappear(_ animated: Bool) {
     super.viewDidDisappear(true)
-    Database.database().reference().child("Teams").child(myUser.teamID).child("UserTasks").child(myUser.userID).removeAllObservers()
+    if joinedTeam {
+      Database.database().reference().child("Teams").child(myUser.teamID).child("UserTasks").child(myUser.userID).removeAllObservers()
+    }
+    joinedTeam = true
   }
   
   fileprivate func NavBarSetup() {
     self.title = "MY PROFILE"
     navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-    navigationItem.rightBarButtonItem = UIBarButtonItem(image: UIImage(named: "pen_paper_2-512"), style: .plain, target: self, action: #selector(editPressed(_:)))
+    navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "pen_paper_2-512"), style: .plain, target: self, action: #selector(editPressed(_:)))
   }
   
   
@@ -88,10 +101,11 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     
     self.view.addSubview(segmentedControl2)
     segmentedControl2.translatesAutoresizingMaskIntoConstraints = false
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.centerX, relatedBy: NSLayoutRelation.equal, toItem: segmentBG, attribute: NSLayoutAttribute.centerX, multiplier: 1, constant: 0).isActive = true
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.topMargin, relatedBy: NSLayoutRelation.equal, toItem: segmentBG, attribute: NSLayoutAttribute.topMargin, multiplier: 1, constant: 7).isActive = true
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: 375).isActive = true
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: 44).isActive = true
+    let width = view.frame.width
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.centerX, relatedBy: NSLayoutConstraint.Relation.equal, toItem: segmentBG, attribute: NSLayoutConstraint.Attribute.centerX, multiplier: 1, constant: 0).isActive = true
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.topMargin, relatedBy: NSLayoutConstraint.Relation.equal, toItem: segmentBG, attribute: NSLayoutConstraint.Attribute.topMargin, multiplier: 1, constant: 7).isActive = true
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.width, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: width).isActive = true
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: 44).isActive = true
   }
   
   internal func xmSegmentedControl(_ xmSegmentedControl: XMSegmentedControl, selectedSegment: Int) {
@@ -139,10 +153,10 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
       if let children = snapshot.children.allObjects as? [DataSnapshot] {
         for child in children {
           if let dict = child.value as? [String:AnyObject] {
-            let task = Task(data: dict)
+            let task = Task(dict)
             self.myTasks.append(task)
             self.taskTableView.reloadData()
-            if task.done == true {
+            if task.done {
               self.completedTasks += 1
             }
             self.taskNumber.text = "\(self.myTasks.count)"
@@ -198,24 +212,10 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     return 65.0
   }
   
-  internal func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
-    if myTasks.count > 0 {
-      if let cell = tableView.cellForRow(at: indexPath) {
-        let view = UIImageView(image: UIImage(named: "check"))
-        cell.accessoryView = view
-        let currentTask = myTasks[indexPath.row]
-        currentTask.clickTask()
-        let adjustment = ["done" : false]
-        completedTasks -= 1
-        updateCount()
-        Database.database().reference().child("Teams").child(myUser.teamID).child("UserTasks").child(myUser.userID).child(currentTask.ID).updateChildValues(adjustment)
-      }
-    }
-  }
   internal func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     if myTasks.count > 0 {
       if let cell = tableView.cellForRow(at: indexPath) {
-        let view = UIImageView(image: UIImage(named: "checked"))
+        let view = UIImageView(image: #imageLiteral(resourceName: "checked"))
         cell.accessoryView = view
         let currentTask = myTasks[indexPath.row]
         currentTask.clickTask()
@@ -226,6 +226,22 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
       }
     }
   }
+  
+  internal func tableView(_ tableView: UITableView, didDeselectRowAt indexPath: IndexPath) {
+    if myTasks.count > 0 {
+      if let cell = tableView.cellForRow(at: indexPath) {
+        let view = UIImageView(image: #imageLiteral(resourceName: "check"))
+        cell.accessoryView = view
+        let currentTask = myTasks[indexPath.row]
+        currentTask.clickTask()
+        let adjustment = ["done" : false]
+        completedTasks -= 1
+        updateCount()
+        Database.database().reference().child("Teams").child(myUser.teamID).child("UserTasks").child(myUser.userID).child(currentTask.ID).updateChildValues(adjustment)
+      }
+    }
+  }
+
   
   @IBAction func imagePressed(_ sender: Any) {
     imagePicker = UIImagePickerController()
@@ -258,10 +274,10 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
   fileprivate func handleAccessDeny() {
     let alert = UIAlertController(title: "Access denied", message: "You need to allow MeetingManager access to your gallery to upload an image.", preferredStyle: .alert)
     alert.addAction(UIAlertAction(title: "Go to settings", style: .default, handler: { _ in
-      let settingsUrl = NSURL(string:UIApplicationOpenSettingsURLString)
+      let settingsUrl = NSURL(string:UIApplication.openSettingsURLString)
       if let url = settingsUrl {
         DispatchQueue.main.async {
-          UIApplication.shared.open(url as URL, options: [:], completionHandler: nil) //(url as URL)
+          UIApplication.shared.open(url as URL, options: convertToUIApplicationOpenExternalURLOptionsKeyDictionary([:]), completionHandler: nil) //(url as URL)
         }
       }
     }))
@@ -269,10 +285,13 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     self.present(alert,animated: true,completion: nil)
   }
   
-  internal func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+  internal func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+// Local variable inserted by Swift 4.2 migrator.
+let info = convertFromUIImagePickerControllerInfoKeyDictionary(info)
+
     SVProgressHUD.show()
-    if let chosenImage = info[UIImagePickerControllerEditedImage] as? UIImage {
-      guard let imageData = UIImageJPEGRepresentation(chosenImage, 0.1) else {return}
+    if let chosenImage = info[convertFromUIImagePickerControllerInfoKey(UIImagePickerController.InfoKey.editedImage)] as? UIImage {
+      guard let imageData = chosenImage.jpegData(compressionQuality: 0.1) else {return}
       Storage.storage().reference().child("profilePhoto").child(myUser.userID).putData(imageData).observe(.success) { (snapshot) in
         // When the image has successfully uploaded, we get it's download URL
         Storage.storage().reference().child("profilePhoto").child(self.myUser.userID).downloadURL(completion: { (url, error) in
@@ -312,6 +331,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
       cityEdit.isHidden = false
     } else { // Done Editing
       editingProfile = false
+      view.endEditing(true)
       let newData = ["city" : cityEdit.text!,
                      "position" : postitionEdit.text!,
                      "phone" : phoneEdit.text!,
@@ -319,7 +339,10 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                      "birth":birthEdit.text!,
                      "profilepicURL":myUser.imageURL]
       Database.database().reference().child("Users").child(myUser.userID).updateChildValues(newData)
-      Database.database().reference().child("Teams").child(myUser.teamID).child("Members").child(myUser.userID).updateChildValues(newData)
+      if myUser.teamID != "" {
+        Database.database().reference().child("Teams").child(myUser.teamID).child("Members").child(myUser.userID).updateChildValues(newData)
+      }
+      myUser.updateUser(newData as [String : AnyObject])
       profCity.text = cityEdit.text
       profPosition.text = postitionEdit.text
       phoneLabel.text = phoneEdit.text
@@ -340,6 +363,24 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
   }
   
+  @IBAction func backPressed(_ sender: Any) {
+    self.dismiss(animated: true, completion: nil)
+  }
   
   
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromUIImagePickerControllerInfoKeyDictionary(_ input: [UIImagePickerController.InfoKey: Any]) -> [String: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToUIApplicationOpenExternalURLOptionsKeyDictionary(_ input: [String: Any]) -> [UIApplication.OpenExternalURLOptionsKey: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (UIApplication.OpenExternalURLOptionsKey(rawValue: key), value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromUIImagePickerControllerInfoKey(_ input: UIImagePickerController.InfoKey) -> String {
+	return input.rawValue
 }

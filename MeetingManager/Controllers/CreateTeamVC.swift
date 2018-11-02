@@ -1,6 +1,6 @@
 //
 //  CreateTeamVC.swift
-//  TEDxMeet
+//  MeetingManager
 //
 //  Created by Ahmed Eltabbal on 5/27/18.
 //  Copyright © 2018 Ahmed Eltabbal. All rights reserved.
@@ -12,6 +12,7 @@ import SVProgressHUD
 
 class CreateTeamVC: UIViewController,UITextFieldDelegate {
   
+  @IBOutlet weak var joinStatusBtn: UIButton!
   @IBOutlet weak var confirmField: UITextField!
   @IBOutlet weak var correctImg: UIImageView!
   @IBOutlet weak var wrongImg: UIImageView!
@@ -25,6 +26,7 @@ class CreateTeamVC: UIViewController,UITextFieldDelegate {
   var myUser = User()
   var teamNames = [String]()
   var nameAvailable = true
+  var joinStatus = "default"
   
   
   override func viewDidLoad() {
@@ -38,7 +40,7 @@ class CreateTeamVC: UIViewController,UITextFieldDelegate {
   }
   
   @IBAction func createPressed(_ sender: Any) {
-    if nameField.text != "" && nameAvailable == true {
+    if nameField.text != "" && nameAvailable {
       if passField.text != "" && confirmField.text == passField.text {
         SVProgressHUD.show()
         let teamNewID = Database.database().reference().child("Teams").childByAutoId().key
@@ -48,13 +50,17 @@ class CreateTeamVC: UIViewController,UITextFieldDelegate {
                         "country":countryField.text!,
                         "info":infoField.text!,
                         "adminID":myUser.userID,
+                        "joinStatus":joinStatus,
                         "id":teamNewID,
                         "adminName":myUser.userFirstName + " " + myUser.userLastName]
         myUser.teamID = teamNewID
-        let teamRef = ["name":nameField.text!,"password":passField.text!,"id":teamNewID]
+        let teamRef = ["name":nameField.text!,
+                       "password":passField.text!,
+                       "joinStatus":joinStatus,
+                       "id":teamNewID]
         Database.database().reference().child("teamRef").child(teamNewID).setValue(teamRef)
         Database.database().reference().child("Teams").child(teamNewID).child("teaminfo").setValue(teamDict)
-        Database.database().reference().child("Users").child(myUser.userID).updateChildValues(["team":teamNewID])
+        Database.database().reference().child("Users").child(myUser.userID).updateChildValues(["team":teamNewID,"joinStatus":"default"])
         let newMember = ["email" :myUser.userEmail,
                          "firstname" : myUser.userFirstName,
                          "lastname" : myUser.userLastName,
@@ -65,7 +71,8 @@ class CreateTeamVC: UIViewController,UITextFieldDelegate {
                          "birth":myUser.birth,
                          "country":myUser.birth,
                          "phone":myUser.phone,
-                         "team":teamNewID]
+                         "team":teamNewID,
+                         "joinStatus":"default"]
         Database.database().reference().child("Teams").child(teamNewID).child("Members").child(myUser.userID).setValue(newMember) { (err, ref) in
           if err == nil {
             SVProgressHUD.dismiss()
@@ -87,6 +94,18 @@ class CreateTeamVC: UIViewController,UITextFieldDelegate {
   }
   
   
+  @IBAction func adminStatusPressed(_ sender: UIButton) {
+    self.view.endEditing(true)
+    if joinStatus == "default" {
+      joinStatus = "private"
+      let img = #imageLiteral(resourceName: "buttonOn")
+      sender.setImage(img, for: .normal)
+    } else {
+      joinStatus = "default"
+      let img = #imageLiteral(resourceName: "buttonOff")
+      sender.setImage(img, for: .normal)
+    }
+  }
   
   fileprivate func getTeamNames() {
     Database.database().reference().child("teamRef").observeSingleEvent(of: .value) { (snap) in

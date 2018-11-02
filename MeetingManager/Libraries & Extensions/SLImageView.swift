@@ -41,7 +41,7 @@ class SLImageView: UIImageView {
     let startingFrame = self.superview?.convert(self.frame, to: nil)
     let tmpImageView = UIImageView(frame: startingFrame!)
     tmpImageView.image = self.image
-    tmpImageView.contentMode = UIViewContentMode.scaleAspectFit
+    tmpImageView.contentMode = UIView.ContentMode.scaleAspectFit
     tmpImageView.backgroundColor = UIColor.clear
     tmpImageView.tag = imageTag
     tmpImageView.alpha = 0.3

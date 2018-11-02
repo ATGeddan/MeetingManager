@@ -1,6 +1,6 @@
 //
-//  UserModel.swift
-//  TEDxMeet
+//  Models.swift
+//  MeetingManager
 //
 //  Created by Ahmed Eltabbal on 5/13/18.
 //  Copyright © 2018 Ahmed Eltabbal. All rights reserved.
@@ -19,6 +19,7 @@ class User {
   private var _phone:String!
   private var _country:String!
   private var _birth:String!
+  private var _joinStatus:String!
   var teamID:String!
   
   var userEmail:String {
@@ -51,12 +52,13 @@ class User {
   var birth:String {
     return _birth ?? ""
   }
-  
-  
-  init() {
+  var joinStatus:String {
+    return _joinStatus ?? ""
   }
   
-  convenience init(data:[String:AnyObject]) {
+  init() {  }
+  
+  convenience init(_ data: [String:AnyObject]) {
     self.init()
     if let email = data["email"] as? String {
       _userEmail = email
@@ -91,9 +93,12 @@ class User {
     if let team = data["team"] as? String {
       teamID = team
     }
+    if let joinStatus = data["joinStatus"] as? String {
+      _joinStatus = joinStatus
+    }
   }
   
-  func updateUser(data:[String:AnyObject]) {
+  func updateUser(_ data: [String:AnyObject]) {
     
     if let email = data["email"] as? String {
       _userEmail = email
@@ -128,10 +133,17 @@ class User {
     if let team = data["team"] as? String {
       teamID = team
     }
+    if let joinStatus = data["joinStatus"] as? String {
+      _joinStatus = joinStatus
+    }
   }
   
-  func changePhoto(url:String) {
+  func changePhoto(url: String) {
     _imageURL = url
+  }
+  
+  func updateJoinStatus(status: String) {
+    _joinStatus = status
   }
 }
 // ------------------------------------------
@@ -145,6 +157,7 @@ class Team {
   private var _pass:String!
   private var _adminID:String!
   private var _adminName:String!
+  private var _joinStatus:String!
   
   var name:String {
     return _name ?? ""
@@ -170,10 +183,13 @@ class Team {
   var adminName:String {
     return _adminName ?? ""
   }
+  var joinStatus:String {
+    return _joinStatus ?? ""
+  }
   
-  init() {}
+  init() {  }
   
-  convenience init(data:[String:AnyObject]) {
+  convenience init(_ data:[String:AnyObject]) {
     self.init()
     
     if let name = data["name"] as? String {
@@ -199,6 +215,9 @@ class Team {
     }
     if let adminName = data["adminName"] as? String {
       _adminName = adminName
+    }
+    if let joinStatus = data["joinStatus"] as? String {
+      _joinStatus = joinStatus
     }
   }
   
@@ -262,10 +281,9 @@ class MeetingModel {
     return _seen ?? ""
   }
   
-  init() {
-  }
+  init() {  }
   
-  convenience init(data:[String:AnyObject]) {
+  convenience init(_ data:[String:AnyObject]) {
     self.init()
     if let date = data["date"] as? String {
       _meetingDate = date
@@ -329,7 +347,7 @@ class Comment {
     return _userID ?? ""
   }
   
-  init(data:[String:AnyObject]) {
+  init(_ data:[String:AnyObject]) {
     if let imageURL = data["imageURL"] as? String {
       _imageURL = imageURL
     }
@@ -371,7 +389,7 @@ class Task {
     return _date ?? ""
   }
   
-  init(data:[String:AnyObject]) {
+  init(_ data:[String:AnyObject]) {
     if let task2 = data["task"] as? String {
       _task = task2
     }
@@ -412,7 +430,7 @@ class ImageModel {
     return _uploaderName ?? ""
   }
   
-  init(data:[String:AnyObject]) {
+  init(_ data:[String:AnyObject]) {
     if let url2 = data["url"] as? String {
       _url = url2
     }
@@ -448,7 +466,7 @@ class LinkModel {
     return _ID ?? ""
   }
   
-  init(data:[String:AnyObject]) {
+  init(_ data:[String:AnyObject]) {
     if let url = data["url"] as? String {
       _url = url
     }

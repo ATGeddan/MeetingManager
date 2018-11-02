@@ -30,7 +30,7 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
     super.viewDidLoad()
     
     getUsers()
-    createDatePicker()
+    createDateTimePicker()
     navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(donePressed))
   }
   
@@ -38,16 +38,17 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
   
   @IBAction func allPressed(_ sender: UIButton) {
     self.view.endEditing(true)
+    let width = view.frame.width
     if tableLeading.constant == 0 {
       UIView.animate(withDuration: 0.3) {
-        self.tableLeading.constant = -377
+        self.tableLeading.constant = -width - 5
         self.membersView.alpha = 0
         self.view.layoutIfNeeded()
       }
     }
     chosenUsers = []
-    allMemberBtn.setImage(UIImage(named: "buttonOn"), for: .normal)
-    membersBtn.setImage(UIImage(named: "buttonOff"), for: .normal)
+    allMemberBtn.setImage(#imageLiteral(resourceName: "buttonOn"), for: .normal)
+    membersBtn.setImage(#imageLiteral(resourceName: "buttonOff"), for: .normal)
     for user in users {
       chosenUsers.append(user.userID)
     }
@@ -56,16 +57,17 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
   
   @IBAction func specificPressed(_ sender: UIButton) {
     self.view.endEditing(true)
-    if tableLeading.constant == -377 {
-      allMemberBtn.setImage(UIImage(named: "buttonOff"), for: .normal)
-      membersBtn.setImage(UIImage(named: "buttonOn"), for: .normal)
+    let width = view.frame.width
+    if tableLeading.constant == -width - 5 {
+      allMemberBtn.setImage(#imageLiteral(resourceName: "buttonOff"), for: .normal)
+      membersBtn.setImage(#imageLiteral(resourceName: "buttonOn"), for: .normal)
       self.chosenUsers = []
       let selectedItems = userTableView.indexPathsForSelectedRows
       if selectedItems != nil {
         for x in selectedItems! {
           userTableView.deselectRow(at: x, animated: true)
           if let cell = userTableView.cellForRow(at: x) {
-            let view = UIImageView(image: UIImage(named: "check"))
+            let view = UIImageView(image: #imageLiteral(resourceName: "check"))
             cell.accessoryView = view
           }
         }
@@ -87,8 +89,9 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
   
   internal func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
     let cell = userTableView.dequeueReusableCell(withIdentifier: "userCell0", for: indexPath) as! userCell0
-    cell.userName.text = users[indexPath.row].userFirstName + " " + users[indexPath.row].userLastName
-    let view = UIImageView(image: UIImage(named: "check"))
+    let theUser = users[indexPath.row]
+    cell.userName.text = theUser.userFirstName + " " + theUser.userLastName
+    let view = UIImageView(image: #imageLiteral(resourceName: "check"))
     cell.accessoryView = view
     return cell
   }
@@ -98,7 +101,7 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
     chosenUsers.append(item)
     
     if let cell = tableView.cellForRow(at: indexPath) {
-      let view = UIImageView(image: UIImage(named: "checked"))
+      let view = UIImageView(image: #imageLiteral(resourceName: "checked"))
       cell.accessoryView = view
     }
   }
@@ -109,18 +112,18 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
       chosenUsers.remove(at: index)
     }
     if let cell = tableView.cellForRow(at: indexPath) {
-      let view = UIImageView(image: UIImage(named: "check"))
+      let view = UIImageView(image: #imageLiteral(resourceName: "check"))
       cell.accessoryView = view
     }
   }
   
   fileprivate func getUsers() {
     membersView.alpha = 0
-    tableLeading.constant = -377
+    tableLeading.constant = -view.frame.width - 5
     let teamRef = Database.database().reference().child("Teams").child(myUser.teamID).child("Members")
     teamRef.observe(.childAdded) { (snapshot) in
       if let dictionary0 = snapshot.value as? [String:AnyObject] {
-        let user = User(data: dictionary0)
+        let user = User(dictionary0)
         self.users.append(user)
         self.userTableView.reloadData()
       }
@@ -146,11 +149,11 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
     }
   }
   
-  fileprivate func createDatePicker() {
+  fileprivate func createDateTimePicker() {
     let toolbar = UIToolbar()
     toolbar.sizeToFit()
     
-    let done = UIBarButtonItem(barButtonSystemItem: .done, target: nil, action: #selector(doneWithDate))
+    let done = UIBarButtonItem(barButtonSystemItem: .done, target: nil, action: #selector(doneWithDateTime))
     toolbar.setItems([done], animated: true)
     toolbar.tintColor = UIColor.darkGray
     dateField.inputAccessoryView = toolbar
@@ -158,7 +161,7 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
     picker.datePickerMode = .dateAndTime
   }
   
-  @objc fileprivate func doneWithDate() {
+  @objc fileprivate func doneWithDateTime() {
     let formatter = DateFormatter()
     formatter.dateStyle = .medium
     formatter.timeStyle = .short

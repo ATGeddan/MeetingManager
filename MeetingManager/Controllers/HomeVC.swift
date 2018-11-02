@@ -1,6 +1,6 @@
 //
 //  HomeVC.swift
-//  TEDxMeet
+//  MeetingManager
 //
 //  Created by Ahmed Eltabbal on 5/13/18.
 //  Copyright © 2018 Ahmed Eltabbal. All rights reserved.
@@ -11,8 +11,13 @@ import Firebase
 import Kingfisher
 import SVProgressHUD
 
+
+
 class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   
+  @IBOutlet weak var changeJoinStatus: UIButton!
+  @IBOutlet weak var notifBubble4: UIImageView!
+  @IBOutlet weak var notifLabel4: UILabel!
   @IBOutlet weak var confirmPassBtn: UIButton!
   @IBOutlet weak var nextNotifLabel: UILabel!
   @IBOutlet weak var notifBubble3: UIImageView!
@@ -51,19 +56,29 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   var nextID:String!
   var nextMeetingSeen = true
   var newTasksSeen = true
+  var requestsSeen = true
   
   
   override func viewDidLoad() {
     super.viewDidLoad()
+    getPersonalInfo()
+    setUpSideMenu()
     checkAuth()
     updateMeetings()
     getTeamData()
-    getPersonalInfo()
     updateNotifs()
     checkNextMeeting()
     
     hideNavBar()
-    
+  }
+  
+  
+  fileprivate func setUpSideMenu() {
+    menuLeading.constant = -222
+    nextMeetingLeading.constant = -200
+    sideMenu.layer.cornerRadius = 5
+    sideImage.layer.borderWidth = 1
+    sideImage.layer.borderColor = UIColor.gray.cgColor
     sideMenu.addShadow(location: .right, color: UIColor.black, opacity: 0.8, radius: 3.0)
   }
   
@@ -109,7 +124,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         self.meetings = []
         for child in children {
           if let dict = child.value as? [String:AnyObject] {
-            let model = MeetingModel(data: dict)
+            let model = MeetingModel(dict)
             self.meetings.insert(model, at: 0)
             self.tableView.reloadData()
           }
@@ -132,31 +147,27 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   }
   
   fileprivate func getPersonalInfo() {
-    menuLeading.constant = -222
-    nextMeetingLeading.constant = -200
-    sideMenu.layer.cornerRadius = 5
-    sideImage.layer.borderWidth = 1
-    sideImage.layer.borderColor = UIColor.gray.cgColor
-    
-    Database.database().reference().child("Users").child(myUser.userID).observe(.value) { (snapshot) in
+    guard let myID = Auth.auth().currentUser?.uid else {return}
+    Database.database().reference().child("Users").child(myID).removeAllObservers()
+    Database.database().reference().child("Users").child(myID).observe(.value, with: { (snapshot) in
       if let dicts = snapshot.value as? [String:AnyObject] {
-        self.myUser.updateUser(data: dicts)
+        self.myUser.updateUser(dicts)
         if self.myUser.teamID != "" {
           let image = URL(string: self.myUser.imageURL)
           self.sideImage.kf.setImage(with: image)
           self.sideName.text = self.myUser.userFirstName + " " + self.myUser.userLastName
           self.sideEmail.text = self.myUser.userEmail
         } else {
-          Database.database().reference().removeAllObservers()
-          let alert = UIAlertController(title: "Removed", message: "You have been kicked from this team or the team itself is deleted", preferredStyle: UIAlertControllerStyle.alert)
+          let alert = UIAlertController(title: "Removed", message: "You have been kicked from this team or the team itself is deleted", preferredStyle: UIAlertController.Style.alert)
           alert.addAction(UIAlertAction(title: "OK", style: .destructive, handler: { (action) in
             self.myUser.teamID = ""
-            self.dismiss(animated: true, completion: nil)
+            self.performSegue(withIdentifier: "backWelcome", sender: nil)
           }))
+          self.navigationController?.popToRootViewController(animated: true)
           self.present(alert, animated: true, completion: nil)
         }
       }
-    }
+    })
     
   }
   
@@ -180,18 +191,46 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     }
   }
   
+  fileprivate func checkNewRequests() {
+    if myUser.userID == team.adminID {
+      Database.database().reference().child("Teams").child(myUser.teamID).child("NewRequests").observeSingleEvent(of: .value) { snap in
+        if let children = snap.children.allObjects as? [DataSnapshot] {
+          if children.count > 0 {
+            self.requestsSeen = false
+            self.checkNotifToggle()
+            self.notifLabel4.isHidden = false
+            self.notifBubble4.isHidden = false
+          } else {
+            self.requestsSeen = true
+            self.checkNotifToggle()
+            self.notifLabel4.isHidden = true
+            self.notifBubble4.isHidden = true
+          }
+        }
+      }
+    }
+  }
+  
   fileprivate func updateNotifs() {
-    Database.database().reference().child("Teams").child(myUser.teamID).child("NewTasks").child(myUser.userID).observe(.childAdded) { (snap) in
+    Database.database().reference().child("Teams").child(myUser.teamID).child("NewTasks").child(myUser.userID).observe(.childAdded) { _ in
       self.checkNewTasks()
     }
-    Database.database().reference().child("Teams").child(myUser.teamID).child("NewTasks").child(myUser.userID).observe(.childRemoved) { (snap) in
+    Database.database().reference().child("Teams").child(myUser.teamID).child("NewTasks").child(myUser.userID).observe(.childRemoved) { _ in
       self.taskNumber = 0
       self.checkNewTasks()
+    }
+    if myUser.userID == team.adminID {
+      Database.database().reference().child("Teams").child(myUser.teamID).child("NewRequests").observe(.childAdded) { _ in
+        self.checkNewRequests()
+      }
+      Database.database().reference().child("Teams").child(myUser.teamID).child("NewRequests").observe(.childRemoved) { _ in
+        self.checkNewRequests()
+      }
     }
   }
   
   fileprivate func checkNotifToggle() {
-    if nextMeetingSeen == false || newTasksSeen == false {
+    if !nextMeetingSeen || !newTasksSeen || !requestsSeen {
       self.notifBubble.isHidden = false
       self.newTaskNumber.isHidden = false
     } else {
@@ -204,7 +243,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     let ref = Database.database().reference().child("Teams").child(myUser.teamID).child("NextMeeting")
     ref.child(myUser.userID).observe(.value) { (snap) in
       if let dict = snap.value as? [String:AnyObject] {
-        let meeting = MeetingModel(data: dict)
+        let meeting = MeetingModel(dict)
         self.nextMDate.text = meeting.meetingDate
         self.nextMCity.text = meeting.meetingCity
         self.nextMPlace.text = meeting.meetingPlace
@@ -249,11 +288,11 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   }
   
   @IBAction func cancelMeeting(_ sender: Any) {
-    let alert = UIAlertController(title: "Are you sure?", message: "Do you want to cancel the next meeting?", preferredStyle: UIAlertControllerStyle.alert)
+    let alert = UIAlertController(title: "Are you sure?", message: "Do you want to cancel the next meeting?", preferredStyle: UIAlertController.Style.alert)
     alert.addAction(UIAlertAction(title: "Sure", style: .destructive, handler: { _ in
       self.confirmNextCancel()
     }))
-    alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+    alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel, handler: nil))
     self.present(alert, animated: true, completion: nil)
     
   }
@@ -263,10 +302,10 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     ref.child("NextMeeting").removeValue()
   }
   
-  func getTeamData() {
+  fileprivate func getTeamData() {
     Database.database().reference().child("Teams").child(myUser.teamID).child("teaminfo").observe(.value) { (snap) in
       if let teamDict = snap.value as? [String:AnyObject] {
-        let myTeam = Team(data: teamDict)
+        let myTeam = Team(teamDict)
         self.team = myTeam
         self.teamName.text = myTeam.name
         self.teamOrg.text = myTeam.organization
@@ -274,6 +313,11 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         self.teamInfo.text = myTeam.info
         if myTeam.adminID == self.myUser.userID {
           self.editTeamBtn.isHidden = false
+          if myTeam.joinStatus == "private" {
+            self.changeJoinStatus.setImage(#imageLiteral(resourceName: "button2On"), for: .normal)
+          } else {
+            self.changeJoinStatus.setImage(#imageLiteral(resourceName: "button2Off"), for: .normal)
+          }
         } else {
           self.editTeamBtn.isHidden = true
         }
@@ -347,17 +391,26 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
           Database.database().reference().child("teamRef").child(self.myUser.teamID).updateChildValues(["password":newPass])
           self.openClosePass()
         } else {
-          let alert = UIAlertController(title: "Confirm new password", message: "Your new password and confirm password do not match", preferredStyle: .alert)
-          alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-          self.present(alert,animated: true,completion: nil)
+          self.displayBasicAlert(title: "Passwords do not match", msg: "Make sure your new password matches the confirm password")
         }
       } else {
-        let alert = UIAlertController(title: "Incorrect", message: "Old password is incorrect", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-        self.present(alert,animated: true,completion: nil)
+        self.displayBasicAlert(title: "Incorrect", msg: "Old password is incorrect")
       }
     }
   }
+  
+  @IBAction func changeStatus(_ sender: Any) {
+    if team.joinStatus == "default" {
+      let adjust = ["joinStatus":"private"]
+      Database.database().reference().child("teamRef").child(team.id).updateChildValues(adjust)
+      Database.database().reference().child("Teams").child(self.myUser.teamID).child("teaminfo").updateChildValues(adjust)
+    } else {
+      let adjust = ["joinStatus":"default"]
+      Database.database().reference().child("teamRef").child(team.id).updateChildValues(adjust)
+      Database.database().reference().child("Teams").child(self.myUser.teamID).child("teaminfo").updateChildValues(adjust)
+    }
+  }
+  
   
   func openClosePass() {
     if viewTop.constant == 32 {
@@ -380,12 +433,12 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   }
   
   @IBAction func deleteTeamPressed(_ sender: Any) {
-    let alert = UIAlertController(title: "Are You Sure?", message: "Removing this team will delete all its related data", preferredStyle: UIAlertControllerStyle.alert)
+    let alert = UIAlertController(title: "Are You Sure?", message: "Removing this team will delete all its related data", preferredStyle: UIAlertController.Style.alert)
     
-    alert.addAction(UIAlertAction(title: "Delete", style: UIAlertActionStyle.destructive, handler: { action in
+    alert.addAction(UIAlertAction(title: "Delete", style: UIAlertAction.Style.destructive, handler: { action in
       self.deleteTriggered()
     }))
-    alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+    alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel, handler: nil))
     self.present(alert, animated: true, completion: nil)
   }
   
@@ -396,8 +449,9 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
       if let users = snap.children.allObjects as? [DataSnapshot] {
         for usr in users {
           if let userDict = usr.value as? [String:AnyObject] {
-            let user = User(data: userDict)
-            Database.database().reference().child("Users").child(user.userID).updateChildValues(["team":""])
+            let user = User(userDict)
+            Database.database().reference().child("Users").child(user.userID).updateChildValues(["team":"","joinStatus":"default"])
+            Database.database().reference().child("Teams").child(teamid).child("Members").child(user.userID).removeValue()
           }
         }
       }
@@ -421,25 +475,24 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     Database.database().reference().child("Teams").child(teamid).child("Meetings").removeValue()
     Database.database().reference().child("Teams").child(teamid).child("MeetingLinks").removeValue()
     Database.database().reference().child("Teams").child(teamid).child("UserTasks").removeValue()
+    Database.database().reference().child("Teams").child(teamid).child("teaminfo").removeValue()
     SVProgressHUD.dismiss()
-    self.performSegue(withIdentifier: "backWelcome", sender: self.myUser)
+    
   }
   
   // MARK: Leaving Team
   
   @IBAction func leavePressed(_ sender: Any) {
     if myUser.userID != team.adminID {
-      let alert = UIAlertController(title: "Are You Sure?", message: "Do you want to leave this team?", preferredStyle: UIAlertControllerStyle.alert)
+      let alert = UIAlertController(title: "Are You Sure?", message: "Do you want to leave this team?", preferredStyle: UIAlertController.Style.alert)
       
-      alert.addAction(UIAlertAction(title: "Leave", style: UIAlertActionStyle.destructive, handler: { action in
+      alert.addAction(UIAlertAction(title: "Leave", style: UIAlertAction.Style.destructive, handler: { action in
         self.leaveTriggered()
       }))
-      alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+      alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel, handler: nil))
       self.present(alert, animated: true, completion: nil)
     } else {
-      let alert = UIAlertController(title: "You are the admin", message: "Please change the team admin first or delete the team if you are the only member", preferredStyle: UIAlertControllerStyle.alert)
-      alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.cancel, handler: nil))
-      self.present(alert, animated: true, completion: nil)
+      self.displayBasicAlert(title: "You are the Admin", msg: "Please change the team admin first or delete the team if you are the only member")
     }
   }
   
@@ -468,16 +521,18 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   @objc func handleLogOut() {
     do {
       try Auth.auth().signOut()
+      Database.database().reference().child("Users").child(myUser.userID).removeAllObservers()
+      performSegue(withIdentifier: "toLogin", sender: nil)
     } catch {
       print(error.localizedDescription)
     }
-    performSegue(withIdentifier: "toLogin", sender: self)
+    
   }
   
   @IBAction func menuBarPressed(_ sender: Any) {
     
     if self.menuLeading.constant != -12 {
-      if editingTeam == true {
+      if editingTeam {
         self.editTeam(self)
       }
       UIView.animate(withDuration: 0.4) {
@@ -498,7 +553,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     if sender.state == .began || sender.state == .changed {
       let translation = sender.translation(in: self.view).x
       if translation > 20 { // Swipe right
-        if editingTeam == true {
+        if editingTeam {
           self.editTeam(self)
         }
         UIView.animate(withDuration: 0.4) {
@@ -547,15 +602,15 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     if myUser.userID != team.adminID {
       performSegue(withIdentifier: "createMeeting", sender: myUser)
     } else {
-      let alert = UIAlertController(title: "Add or Book?", message: "Do you want to add a meeting or book a future meeting and invite members?", preferredStyle: UIAlertControllerStyle.alert)
+      let alert = UIAlertController(title: "Add or Book?", message: "Do you want to add a meeting or book a future meeting and invite members?", preferredStyle: UIAlertController.Style.alert)
       
-      alert.addAction(UIAlertAction(title: "Add Meeting", style: UIAlertActionStyle.default, handler: { action in
+      alert.addAction(UIAlertAction(title: "Add Meeting", style: UIAlertAction.Style.default, handler: { action in
         self.addTriggered()
       }))
-      alert.addAction(UIAlertAction(title: "Future Meeting", style: UIAlertActionStyle.default, handler: { action in
+      alert.addAction(UIAlertAction(title: "Future Meeting", style: UIAlertAction.Style.default, handler: { action in
         self.futureTriggered()
       }))
-      alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+      alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel, handler: nil))
       self.present(alert, animated: true, completion: nil)
     }
   }
@@ -597,7 +652,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     if let destination = segue.destination as? MeetingVC,let model = sender as? MeetingModel {
       destination.currentMeeting = model
       destination.myUser = myUser
-      if editingTeam == true {
+      if editingTeam {
         self.editTeam(self)
       }
     }
@@ -608,7 +663,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
       self.newTaskNumber2.isHidden = true
       des.myUser = user
       des.myTeam = team
-      if editingTeam == true {
+      if editingTeam {
         self.editTeam(self)
       }
     }
@@ -616,7 +671,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     if let dest = segue.destination as? MeetingAddVC,let user = sender as? User {
       dest.myUser = user
       dest.myTeam = team
-      if editingTeam == true {
+      if editingTeam {
         self.editTeam(self)
       }
     }
@@ -632,7 +687,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     if let dest3 = segue.destination as? UsersTableVC, let user = sender as? User {
       dest3.myUser = user
       dest3.myTeam = team
-      if editingTeam == true {
+      if editingTeam {
         self.editTeam(self)
       }
     }

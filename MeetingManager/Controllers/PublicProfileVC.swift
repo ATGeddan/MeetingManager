@@ -1,6 +1,6 @@
 //
 //  PublicProfileVC.swift
-//  TEDxMeet
+//  MeetingManager
 //
 //  Created by Ahmed Eltabbal on 5/14/18.
 //  Copyright © 2018 Ahmed Eltabbal. All rights reserved.
@@ -39,8 +39,7 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
   var tasks = [Task]()
   var completedTasks = 0
   
-  var delegate:changeAdminDelegate!
-  var delegate2:didRemoveMemberDelegate!
+  var delegate:adminActions?
   
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -49,33 +48,34 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
     updateTasks()
     setupSegmentedController()
     
-    if myUser.userID == myTeam.adminID && selectedUser.userID != myTeam.adminID {
+    if myUser.userID == myTeam.adminID && selectedUser.userID != myTeam.adminID && selectedUser.joinStatus == "default" {
       makeAdminBtn.isHidden = false
       removeBtn.isHidden = false
     }
   }
   
   @IBAction func confirmAdmin(sender: UIButton) {
-    let alert = UIAlertController(title: "Are You Sure?", message: "Do you want to make \(selectedUser.userFirstName) the team admin?", preferredStyle: UIAlertControllerStyle.alert)
+    let alert = UIAlertController(title: "Are You Sure?", message: "Do you want to make \(selectedUser.userFirstName) the team admin?", preferredStyle: UIAlertController.Style.alert)
     
-    alert.addAction(UIAlertAction(title: "Confirm", style: UIAlertActionStyle.default, handler: { action in
+    alert.addAction(UIAlertAction(title: "Confirm", style: UIAlertAction.Style.default, handler: { action in
       self.changeAdmin()
     }))
-    alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+    alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel, handler: nil))
     
     self.present(alert, animated: true, completion: nil)
   }
   
   @IBAction func confirmRemove(sender: UIButton) {
-    let alert = UIAlertController(title: "Are You Sure?", message: "Do you want to remove \(selectedUser.userFirstName) from the team?", preferredStyle: UIAlertControllerStyle.alert)
+    let alert = UIAlertController(title: "Are You Sure?", message: "Do you want to remove \(selectedUser.userFirstName) from the team?", preferredStyle: UIAlertController.Style.alert)
     
-    alert.addAction(UIAlertAction(title: "Remove", style: UIAlertActionStyle.destructive, handler: { action in
+    alert.addAction(UIAlertAction(title: "Remove", style: UIAlertAction.Style.destructive, handler: { action in
       self.removeMember()
     }))
-    alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+    alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel, handler: nil))
     
     self.present(alert, animated: true, completion: nil)
   }
+
   
   fileprivate func changeAdmin() {
     delegate?.didChangeAdmin(id: selectedUser.userID)
@@ -85,13 +85,14 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
       if let meetings = snap.children.allObjects as? [DataSnapshot] {
         for meeting in meetings {
           if let dict = meeting.value as? [String:AnyObject] {
-            let meeting = MeetingModel(data: dict)
+            let meeting = MeetingModel(dict)
             teamRef.child("Meetings").child(meeting.meetingID).updateChildValues(["teamAdmin":self.selectedUser.userID])
           }
         }
         self.makeAdminBtn.isHidden = true
         self.removeBtn.isHidden = true
         self.myTeam.updateAdmin(id:self.selectedUser.userID)
+        Database.database().reference().child("Teams").child(self.myUser.teamID).child("NewRequests").removeAllObservers()
         self.tasksTable.reloadData()
       }
     }
@@ -103,7 +104,7 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
     Database.database().reference().child("Users").child(selectedUser.userID).updateChildValues(["team":""])
     teamRef.child("Members").child(selectedUser.userID).removeValue { (err, ref) in
       if err == nil {
-        self.delegate2?.didRemoveMember()
+        self.delegate?.didRemoveMember()
       }
     }
     navigationController?.popViewController(animated: true)
@@ -120,11 +121,12 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
     segmentedControl2.addShadow(location: .top, color: UIColor.darkGray, opacity: 0.5, radius: 3.0)
     
     self.view.addSubview(segmentedControl2)
+    let width = view.frame.width
     segmentedControl2.translatesAutoresizingMaskIntoConstraints = false
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.centerX, relatedBy: NSLayoutRelation.equal, toItem: segmentBG, attribute: NSLayoutAttribute.centerX, multiplier: 1, constant: 0).isActive = true
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.topMargin, relatedBy: NSLayoutRelation.equal, toItem: segmentBG, attribute: NSLayoutAttribute.topMargin, multiplier: 1, constant: 7).isActive = true
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.width, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: 375).isActive = true
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutAttribute.height, relatedBy: NSLayoutRelation.equal, toItem: nil, attribute: NSLayoutAttribute.notAnAttribute, multiplier: 1, constant: 44).isActive = true
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.centerX, relatedBy: NSLayoutConstraint.Relation.equal, toItem: segmentBG, attribute: NSLayoutConstraint.Attribute.centerX, multiplier: 1, constant: 0).isActive = true
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.topMargin, relatedBy: NSLayoutConstraint.Relation.equal, toItem: segmentBG, attribute: NSLayoutConstraint.Attribute.topMargin, multiplier: 1, constant: 7).isActive = true
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.width, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: width).isActive = true
+    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: 44).isActive = true
   }
   
   internal func xmSegmentedControl(_ xmSegmentedControl: XMSegmentedControl, selectedSegment: Int) {
@@ -196,11 +198,11 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
   }
   
   @IBAction func deleteTaskClicked(_ sender: UIButton) {
-    let alert = UIAlertController(title: "Delete?", message: "Do you want to save or delete this task?", preferredStyle: UIAlertControllerStyle.alert)
-    alert.addAction(UIAlertAction(title: "Delete", style: UIAlertActionStyle.destructive, handler: { action in
+    let alert = UIAlertController(title: "Delete?", message: "Do you want to save or delete this task?", preferredStyle: UIAlertController.Style.alert)
+    alert.addAction(UIAlertAction(title: "Delete", style: UIAlertAction.Style.destructive, handler: { action in
       self.confirmDelete(sender)
     }))
-    alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertActionStyle.cancel, handler: nil))
+    alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel, handler: nil))
     self.present(alert, animated: true, completion: nil)
   }
   
@@ -217,10 +219,10 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
       if let children = snapshot.children.allObjects as? [DataSnapshot] {
         for child in children {
           if let dict = child.value as? [String:AnyObject] {
-            let task = Task(data: dict)
+            let task = Task(dict)
             self.tasks.append(task)
             self.tasksTable.reloadData()
-            if task.done == true {
+            if task.done {
               self.completedTasks += 1
             }
             self.numberOfTasks.text = "\(self.tasks.count)"

@@ -1,6 +1,6 @@
 //
 //  MeetingAddVC.swift
-//  TEDxMeet
+//  MeetingManager
 //
 //  Created by Ahmed Eltabbal on 5/15/18.
 //  Copyright © 2018 Ahmed Eltabbal. All rights reserved.
@@ -36,11 +36,10 @@ class MeetingAddVC: UIViewController,UITextViewDelegate {
       textView.text = ""
     }
   }
-  
-  fileprivate func createDatePicker() {
+
+  func createDatePicker() {
     let toolbar = UIToolbar()
     toolbar.sizeToFit()
-    
     let done = UIBarButtonItem(barButtonSystemItem: .done, target: nil, action: #selector(doneWithDate))
     toolbar.setItems([done], animated: true)
     toolbar.tintColor = UIColor.darkGray
@@ -49,7 +48,7 @@ class MeetingAddVC: UIViewController,UITextViewDelegate {
     picker.datePickerMode = .date
   }
   
-  @objc fileprivate func doneWithDate() {
+  @objc func doneWithDate() {
     let formatter = DateFormatter()
     formatter.dateStyle = .medium
     formatter.timeStyle = .none
@@ -68,19 +67,11 @@ class MeetingAddVC: UIViewController,UITextViewDelegate {
                    "ID":meetingNewID,
                    "teamID":myUser.teamID,
                    "adminID":myUser.userID,
-                   "teamAdmin":myTeam.adminID]
-    let newMeeting = MeetingModel(data: newDict as [String:AnyObject])
+                   "teamAdmin":myTeam.adminID] as [String:AnyObject]
+    let newMeeting = MeetingModel(newDict)
     // Upload Data to server
     let databaseRef = Database.database().reference().child("Teams").child(myUser.teamID).child("Meetings").child(newMeeting.meetingID)
-    let dictionary :[String:String] = ["date":newMeeting.meetingDate,
-                                       "place":newMeeting.meetingPlace,
-                                       "city":newMeeting.meetingCity,
-                                       "notes":newMeeting.meetingNotes,
-                                       "ID":newMeeting.meetingID,
-                                       "teamID":newMeeting.teamID,
-                                       "adminID":myUser.userID,
-                                       "teamAdmin":myTeam.adminID]
-    databaseRef.setValue(dictionary) { (error, ref) in
+    databaseRef.setValue(newDict) { (error, ref) in
       if error != nil {
         print(error!.localizedDescription)
       } else {

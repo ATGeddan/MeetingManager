@@ -1,6 +1,6 @@
 //
 //  RegisterVC.swift
-//  TEDxMeet
+//  MeetingManager
 //
 //  Created by Ahmed Eltabbal on 5/13/18.
 //  Copyright © 2018 Ahmed Eltabbal. All rights reserved.
@@ -47,6 +47,26 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
     
   }
   
+  func createDatePicker() {
+    let toolbar = UIToolbar()
+    toolbar.sizeToFit()
+    let done = UIBarButtonItem(barButtonSystemItem: .done, target: nil, action: #selector(doneWithDate))
+    toolbar.setItems([done], animated: true)
+    toolbar.tintColor = UIColor.darkGray
+    birthField.inputAccessoryView = toolbar
+    birthField.inputView = picker
+    picker.datePickerMode = .date
+  }
+  
+  @objc func doneWithDate() {
+    let formatter = DateFormatter()
+    formatter.dateStyle = .medium
+    formatter.timeStyle = .none
+    let dateString = formatter.string(from: picker.date)
+    birthField.text = dateString
+    self.view.endEditing(true)
+  }
+  
   @IBAction func registerPressed(_ sender: Any) {
     guard let email = emailField.text ,let password = passField.text else { return }
     if passField.text == confirmField.text && firstField.text?.isEmpty == false && lastField.text?.isEmpty == false {
@@ -73,7 +93,7 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
         } else {
           self.createProfile()
           SVProgressHUD.dismiss()
-          self.performSegue(withIdentifier: "registered", sender: self.myUser)
+          
         }
       }
     } else {
@@ -85,7 +105,7 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
     let userDB = Database.database().reference().child("Users")
     let defultPicURL = "https://firebasestorage.googleapis.com/v0/b/meetingmanager-b8254.appspot.com/o/default.png?alt=media&token=d8396756-dfc8-4d90-8cc7-b28d723afdae"
     guard let uid = Auth.auth().currentUser?.uid else {return}
-    let userDictionary : [String: String] = ["email" : emailField.text!,
+    let userDictionary = ["email" : emailField.text!,
                                              "firstname" : firstField.text!,
                                              "lastname" : lastField.text!,
                                              "city" : "",
@@ -94,39 +114,21 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
                                              "position":"",
                                              "birth":birthField.text!,
                                              "country":"",
-                                             "phone":""]
-    let user = User(data: userDictionary as [String:AnyObject])
+                                             "phone":"",
+                                             "team":"",
+                                             "joinStatus":""] as [String:AnyObject]
+    let user = User(userDictionary)
     myUser = user
     userDB.child(uid).setValue(userDictionary){
       (error, reference) in
       if error != nil {
         print(error!.localizedDescription)
+      } else {
+        self.performSegue(withIdentifier: "registered", sender: self.myUser)
       }
     }
     
   }
-  
-  fileprivate func createDatePicker() {
-    let toolbar = UIToolbar()
-    toolbar.sizeToFit()
-    
-    let done = UIBarButtonItem(barButtonSystemItem: .done, target: nil, action: #selector(doneWithDate))
-    toolbar.setItems([done], animated: true)
-    toolbar.tintColor = UIColor.darkGray
-    birthField.inputAccessoryView = toolbar
-    birthField.inputView = picker
-    picker.datePickerMode = .date
-  }
-  
-  @objc func doneWithDate() {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .medium
-    formatter.timeStyle = .none
-    let dateString = formatter.string(from: picker.date)
-    birthField.text = dateString
-    self.view.endEditing(true)
-  }
-  
 
   
   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

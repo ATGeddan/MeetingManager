@@ -1,6 +1,6 @@
 //
 //  LoginVC.swift
-//  TEDxMeet
+//  MeetingManager
 //
 //  Created by Ahmed Eltabbal on 5/13/18.
 //  Copyright © 2018 Ahmed Eltabbal. All rights reserved.
@@ -17,6 +17,7 @@ class LoginVC: UIViewController {
   @IBOutlet weak var emailField: UITextField!
   @IBOutlet weak var passField: UITextField!
   
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     checkAuth()
@@ -28,9 +29,7 @@ class LoginVC: UIViewController {
     Auth.auth().signIn(withEmail: emailField.text!, password: passField.text!) { (user, error) in
       if error != nil {
         print(error!.localizedDescription)
-        let alert = UIAlertController(title: "Ops", message: "Please make sure your e-mail and password are correct", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Got it", style: .default, handler: nil))
-        self.present(alert,animated: true,completion: nil)
+        self.displayBasicAlert(title: "Ops", msg: "Please make sure your e-mail and password are correct")
         SVProgressHUD.dismiss()
       } else {
         self.handleSignIn()
@@ -45,12 +44,13 @@ class LoginVC: UIViewController {
     }
   }
   @objc func handleSignIn() {
-    guard let uid = Auth.auth().currentUser?.uid else {return}
-    Database.database().reference().child("Users").child(uid).observeSingleEvent(of: .value, with: { (snapshot) in
+    guard let uId = Auth.auth().currentUser?.uid else {return}
+    Database.database().reference().child("Users").child(uId).observe(.value, with: { (snapshot) in
       if let dictionary = snapshot.value as? [String:AnyObject] {
-        let myUser = User(data: dictionary)
+        let myUser = User(dictionary)
         SVProgressHUD.dismiss()
-        if myUser.teamID == "" {
+        if myUser.teamID == "" || myUser.joinStatus == "private" {
+          self.dismiss(animated: false, completion: nil)
           self.performSegue(withIdentifier: "toWelcome", sender: myUser)
         } else {
           self.performSegue(withIdentifier: "toHome", sender: myUser)
@@ -61,10 +61,11 @@ class LoginVC: UIViewController {
   
   fileprivate func switchBetween() {
     view.endEditing(true)
+    let width = view.frame.width
     if signViewLeading.constant == 0 {
       emailResetField.isHidden = false
       UIView.animate(withDuration: 0.3) {
-        self.signViewLeading.constant = 375
+        self.signViewLeading.constant = width
         self.resetViewLeading.constant = 0
         self.emailResetField.text = self.emailField.text
         self.view.layoutIfNeeded()
@@ -73,7 +74,7 @@ class LoginVC: UIViewController {
       emailResetField.isHidden = true
       UIView.animate(withDuration: 0.3) {
         self.signViewLeading.constant = 0
-        self.resetViewLeading.constant = -375
+        self.resetViewLeading.constant = -width
         self.emailResetField.text = self.emailField.text
         self.view.layoutIfNeeded()
       }
@@ -94,9 +95,7 @@ class LoginVC: UIViewController {
     Auth.auth().sendPasswordReset(withEmail: email) { (err) in
       if err != nil {
         print(err!.localizedDescription)
-        let alert = UIAlertController(title: "Invalid E-mail", message: "Please make sure you are using a valid E-mail address.", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Ok", style: .cancel, handler: nil))
-        self.present(alert, animated: true, completion: nil)
+        self.displayBasicAlert(title: "Invalid E-mail", msg: "Please make sure you are using a valid E-mail address.")
       } else {
         let alert = UIAlertController(title: "E-mail sent", message: "Please check your inbox", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { _ in

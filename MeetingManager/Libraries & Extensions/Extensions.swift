@@ -1,6 +1,6 @@
 //
-//  MeetingModel.swift
-//  TEDxMeet
+//  Extensions.swift
+//  MeetingManager
 //
 //  Created by Ahmed Eltabbal on 5/15/18.
 //  Copyright © 2018 Ahmed Eltabbal. All rights reserved.
@@ -65,6 +65,6 @@ extension UIViewController {
     navigationController?.navigationBar.shadowImage = UIImage()
     navigationController?.navigationBar.isTranslucent = true
     navigationController?.view.backgroundColor = .clear
-  }
+  } 
   
 }
