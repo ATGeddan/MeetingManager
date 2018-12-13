@@ -69,7 +69,6 @@ class MeetingAddVC: UIViewController,UITextViewDelegate {
                    "adminID":myUser.userID,
                    "teamAdmin":myTeam.adminID] as [String:AnyObject]
     let newMeeting = MeetingModel(newDict)
-    // Upload Data to server
     let databaseRef = Database.database().reference().child("Teams").child(myUser.teamID).child("Meetings").child(newMeeting.meetingID)
     databaseRef.setValue(newDict) { (error, ref) in
       if error != nil {

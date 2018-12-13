@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		2611052820C8603F0038E31E /* nextMeetingVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2611052720C8603F0038E31E /* nextMeetingVC.swift */; };
 		263C4C6320D371D200811003 /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 263C4C6220D371D200811003 /* Protocols.swift */; };
+		266540BC21C177530084006A /* Profiles.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 266540BB21C1773B0084006A /* Profiles.storyboard */; };
 		26D3F6C520BE02960072FA38 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26D3F6C420BE02960072FA38 /* AppDelegate.swift */; };
 		26D3F6CA20BE02960072FA38 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 26D3F6C820BE02960072FA38 /* Main.storyboard */; };
 		26D3F6CC20BE02990072FA38 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 26D3F6CB20BE02990072FA38 /* Assets.xcassets */; };
@@ -37,6 +38,7 @@
 		25A660F79FD5A94C1AAE5BFE /* Pods-MeetingManager.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeetingManager.release.xcconfig"; path = "Pods/Target Support Files/Pods-MeetingManager/Pods-MeetingManager.release.xcconfig"; sourceTree = "<group>"; };
 		2611052720C8603F0038E31E /* nextMeetingVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = nextMeetingVC.swift; sourceTree = "<group>"; };
 		263C4C6220D371D200811003 /* Protocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
+		266540BB21C1773B0084006A /* Profiles.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Profiles.storyboard; path = /Users/atgeddan/Desktop/MeetingManager/MeetingManager/Profiles.storyboard; sourceTree = "<absolute>"; };
 		26D3F6C120BE02960072FA38 /* MeetingManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MeetingManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		26D3F6C420BE02960072FA38 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		26D3F6C920BE02960072FA38 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 				26D3F6F220BE03570072FA38 /* Models & Cells */,
 				26D3F6D620BE02F40072FA38 /* Controllers */,
 				26D3F6C420BE02960072FA38 /* AppDelegate.swift */,
+				266540BB21C1773B0084006A /* Profiles.storyboard */,
 				26D3F6C820BE02960072FA38 /* Main.storyboard */,
 				26D3F6CB20BE02990072FA38 /* Assets.xcassets */,
 				26D3F6CD20BE02990072FA38 /* LaunchScreen.storyboard */,
@@ -234,6 +237,7 @@
 			files = (
 				26D3F6CF20BE02990072FA38 /* LaunchScreen.storyboard in Resources */,
 				26D3F6FA20BE06970072FA38 /* GoogleService-Info.plist in Resources */,
+				266540BC21C177530084006A /* Profiles.storyboard in Resources */,
 				26D3F6CC20BE02990072FA38 /* Assets.xcassets in Resources */,
 				26D3F6CA20BE02960072FA38 /* Main.storyboard in Resources */,
 			);

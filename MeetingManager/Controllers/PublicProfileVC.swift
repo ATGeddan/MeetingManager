@@ -112,7 +112,9 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
   
   fileprivate func setupSegmentedController() {
     infoView.alpha = 0
-    let segmentedControl2 = XMSegmentedControl(frame: CGRect(x: 0, y: 375, width: self.view.frame.width, height: 44), segmentTitle: ["Tasks", "Info"], selectedItemHighlightStyle: XMSelectedItemHighlightStyle.bottomEdge)
+    let segmentedControl2 = XMSegmentedControl(frame: CGRect(x: 0, y: 375, width: self.view.frame.width, height: 44),
+                                               segmentTitle: ["Tasks", "Info"],
+                                               selectedItemHighlightStyle: XMSelectedItemHighlightStyle.bottomEdge)
     segmentedControl2.delegate = self
     segmentedControl2.backgroundColor = UIColor.clear
     segmentedControl2.highlightColor = UIColor(red: 192/255, green: 192/255, blue: 192/255, alpha: 1)
@@ -123,10 +125,31 @@ class PublicProfileVC: UIViewController,UITableViewDelegate,UITableViewDataSourc
     self.view.addSubview(segmentedControl2)
     let width = view.frame.width
     segmentedControl2.translatesAutoresizingMaskIntoConstraints = false
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.centerX, relatedBy: NSLayoutConstraint.Relation.equal, toItem: segmentBG, attribute: NSLayoutConstraint.Attribute.centerX, multiplier: 1, constant: 0).isActive = true
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.topMargin, relatedBy: NSLayoutConstraint.Relation.equal, toItem: segmentBG, attribute: NSLayoutConstraint.Attribute.topMargin, multiplier: 1, constant: 7).isActive = true
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.width, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: width).isActive = true
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: 44).isActive = true
+    NSLayoutConstraint(item: segmentedControl2,
+                       attribute: NSLayoutConstraint.Attribute.centerX,
+                       relatedBy: NSLayoutConstraint.Relation.equal,
+                       toItem: segmentBG, attribute: NSLayoutConstraint.Attribute.centerX,
+                       multiplier: 1,
+                       constant: 0).isActive = true
+    
+    NSLayoutConstraint(item: segmentedControl2,
+                       attribute: NSLayoutConstraint.Attribute.topMargin,
+                       relatedBy: NSLayoutConstraint.Relation.equal,
+                       toItem: segmentBG, attribute: NSLayoutConstraint.Attribute.topMargin,
+                       multiplier: 1,
+                       constant: 7).isActive = true
+    NSLayoutConstraint(item: segmentedControl2,
+                       attribute: NSLayoutConstraint.Attribute.width,
+                       relatedBy: NSLayoutConstraint.Relation.equal,
+                       toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute,
+                       multiplier: 1,
+                       constant: width).isActive = true
+    NSLayoutConstraint(item: segmentedControl2,
+                       attribute: NSLayoutConstraint.Attribute.height,
+                       relatedBy: NSLayoutConstraint.Relation.equal,
+                       toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute,
+                       multiplier: 1,
+                       constant: 44).isActive = true
   }
   
   internal func xmSegmentedControl(_ xmSegmentedControl: XMSegmentedControl, selectedSegment: Int) {

@@ -91,7 +91,9 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
   
   
   fileprivate func setupSegmentedController() {
-    segmentedControl2 = XMSegmentedControl(frame: CGRect(x: 0, y: 375, width: self.view.frame.width, height: 44), segmentTitle: ["Tasks", "Info"], selectedItemHighlightStyle: XMSelectedItemHighlightStyle.bottomEdge)
+    segmentedControl2 = XMSegmentedControl(frame: CGRect(x: 0, y: 375, width: self.view.frame.width, height: 44),
+                                           segmentTitle: ["Tasks", "Info"],
+                                           selectedItemHighlightStyle: XMSelectedItemHighlightStyle.bottomEdge)
     segmentedControl2.delegate = self
     segmentedControl2.backgroundColor = UIColor.clear
     segmentedControl2.highlightColor = UIColor(red: 192/255, green: 192/255, blue: 192/255, alpha: 1)
@@ -102,10 +104,30 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     self.view.addSubview(segmentedControl2)
     segmentedControl2.translatesAutoresizingMaskIntoConstraints = false
     let width = view.frame.width
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.centerX, relatedBy: NSLayoutConstraint.Relation.equal, toItem: segmentBG, attribute: NSLayoutConstraint.Attribute.centerX, multiplier: 1, constant: 0).isActive = true
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.topMargin, relatedBy: NSLayoutConstraint.Relation.equal, toItem: segmentBG, attribute: NSLayoutConstraint.Attribute.topMargin, multiplier: 1, constant: 7).isActive = true
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.width, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: width).isActive = true
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: 44).isActive = true
+    NSLayoutConstraint(item: segmentedControl2,
+                       attribute: NSLayoutConstraint.Attribute.centerX,
+                       relatedBy: NSLayoutConstraint.Relation.equal,
+                       toItem: segmentBG, attribute: NSLayoutConstraint.Attribute.centerX,
+                       multiplier: 1,
+                       constant: 0).isActive = true
+    NSLayoutConstraint(item: segmentedControl2,
+                       attribute: NSLayoutConstraint.Attribute.topMargin,
+                       relatedBy: NSLayoutConstraint.Relation.equal,
+                       toItem: segmentBG, attribute: NSLayoutConstraint.Attribute.topMargin,
+                       multiplier: 1,
+                       constant: 7).isActive = true
+    NSLayoutConstraint(item: segmentedControl2,
+                       attribute: NSLayoutConstraint.Attribute.width,
+                       relatedBy: NSLayoutConstraint.Relation.equal,
+                       toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute,
+                       multiplier: 1,
+                       constant: width).isActive = true
+    NSLayoutConstraint(item: segmentedControl2,
+                       attribute: NSLayoutConstraint.Attribute.height,
+                       relatedBy: NSLayoutConstraint.Relation.equal,
+                       toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute,
+                       multiplier: 1,
+                       constant: 44).isActive = true
   }
   
   internal func xmSegmentedControl(_ xmSegmentedControl: XMSegmentedControl, selectedSegment: Int) {
@@ -251,19 +273,15 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     switch status {
     case .authorized:
       self.present(self.imagePicker,animated: true,completion: nil)
-      break
     case .denied, .restricted :
       self.handleAccessDeny()
-      break
     case .notDetermined:
       PHPhotoLibrary.requestAuthorization() { status in
         switch status {
         case .authorized:
           self.present(self.imagePicker,animated: true,completion: nil)
-          break
         case .denied, .restricted:
           self.handleAccessDeny()
-          break
         case .notDetermined:
           break
         }
@@ -337,12 +355,12 @@ let info = convertFromUIImagePickerControllerInfoKeyDictionary(info)
                      "phone" : phoneEdit.text!,
                      "country": countryEdit.text!,
                      "birth":birthEdit.text!,
-                     "profilepicURL":myUser.imageURL]
+                     "profilepicURL":myUser.imageURL] as [String : AnyObject]
       Database.database().reference().child("Users").child(myUser.userID).updateChildValues(newData)
       if myUser.teamID != "" {
         Database.database().reference().child("Teams").child(myUser.teamID).child("Members").child(myUser.userID).updateChildValues(newData)
       }
-      myUser.updateUser(newData as [String : AnyObject])
+      myUser.updateUser(newData)
       profCity.text = cityEdit.text
       profPosition.text = postitionEdit.text
       phoneLabel.text = phoneEdit.text
@@ -364,7 +382,7 @@ let info = convertFromUIImagePickerControllerInfoKeyDictionary(info)
   }
   
   @IBAction func backPressed(_ sender: Any) {
-    self.dismiss(animated: true, completion: nil)
+    presentingViewController?.dismiss(animated: true, completion: nil)
   }
   
   

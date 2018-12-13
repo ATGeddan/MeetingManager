@@ -34,7 +34,10 @@ class nextMeetingVC: UIViewController,UITableViewDelegate,UITableViewDataSource 
     navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Done", style: .plain, target: self, action: #selector(donePressed))
   }
   
-  
+  override func viewWillDisappear(_ animated: Bool) {
+    super.viewWillDisappear(true)
+    Database.database().reference().child("Teams").child(myUser.teamID).child("Members").removeAllObservers()
+  }
   
   @IBAction func allPressed(_ sender: UIButton) {
     self.view.endEditing(true)

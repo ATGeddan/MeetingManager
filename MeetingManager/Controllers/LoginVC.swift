@@ -24,15 +24,15 @@ class LoginVC: UIViewController {
     hideNavBar()
   }
   
-  @IBAction func loginPressed(_ sender: Any) {
+  @IBAction func loginPressed(_ sender: UIButton) {
     SVProgressHUD.show()
-    Auth.auth().signIn(withEmail: emailField.text!, password: passField.text!) { (user, error) in
+    Auth.auth().signIn(withEmail: emailField.text!, password: passField.text!) {[weak self] (user, error) in
       if error != nil {
         print(error!.localizedDescription)
-        self.displayBasicAlert(title: "Ops", msg: "Please make sure your e-mail and password are correct")
+        self?.displayBasicAlert(title: "Ops", msg: "Please make sure your e-mail and password are correct")
         SVProgressHUD.dismiss()
       } else {
-        self.handleSignIn()
+        self?.handleSignIn()
       }
     }
   }
@@ -45,15 +45,16 @@ class LoginVC: UIViewController {
   }
   @objc func handleSignIn() {
     guard let uId = Auth.auth().currentUser?.uid else {return}
-    Database.database().reference().child("Users").child(uId).observe(.value, with: { (snapshot) in
+    Database.database().reference().child("Users").child(uId).observe(.value, with: { [weak self] (snapshot) in
       if let dictionary = snapshot.value as? [String:AnyObject] {
         let myUser = User(dictionary)
         SVProgressHUD.dismiss()
         if myUser.teamID == "" || myUser.joinStatus == "private" {
-          self.dismiss(animated: false, completion: nil)
-          self.performSegue(withIdentifier: "toWelcome", sender: myUser)
+          self?.presentingViewController?.dismiss(animated: false, completion: nil)
+          self?.performSegue(withIdentifier: "toWelcome", sender: myUser)
         } else {
-          self.performSegue(withIdentifier: "toHome", sender: myUser)
+          self?.dismiss(animated: false, completion: nil)
+          self?.performSegue(withIdentifier: "toHome", sender: myUser)
         }
       }
     })
@@ -64,19 +65,19 @@ class LoginVC: UIViewController {
     let width = view.frame.width
     if signViewLeading.constant == 0 {
       emailResetField.isHidden = false
-      UIView.animate(withDuration: 0.3) {
-        self.signViewLeading.constant = width
-        self.resetViewLeading.constant = 0
-        self.emailResetField.text = self.emailField.text
-        self.view.layoutIfNeeded()
+      UIView.animate(withDuration: 0.3) { [weak self] in
+        self?.signViewLeading.constant = width
+        self?.resetViewLeading.constant = 0
+        self?.emailResetField.text = self?.emailField.text
+        self?.view.layoutIfNeeded()
       }
     } else {
       emailResetField.isHidden = true
-      UIView.animate(withDuration: 0.3) {
-        self.signViewLeading.constant = 0
-        self.resetViewLeading.constant = -width
-        self.emailResetField.text = self.emailField.text
-        self.view.layoutIfNeeded()
+      UIView.animate(withDuration: 0.3) { [weak self] in
+        self?.signViewLeading.constant = 0
+        self?.resetViewLeading.constant = -width
+        self?.emailResetField.text = self?.emailField.text
+        self?.view.layoutIfNeeded()
       }
     }
   }
@@ -98,8 +99,8 @@ class LoginVC: UIViewController {
         self.displayBasicAlert(title: "Invalid E-mail", msg: "Please make sure you are using a valid E-mail address.")
       } else {
         let alert = UIAlertController(title: "E-mail sent", message: "Please check your inbox", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { _ in
-          self.switchBetween()
+        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { [weak self]_ in
+          self?.switchBetween()
         }))
         self.present(alert, animated: true, completion: nil)
       }

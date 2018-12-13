@@ -90,7 +90,7 @@ class CreateTeamVC: UIViewController,UITextFieldDelegate {
   }
   
   @IBAction func backPressed(_ sender: Any) {
-    self.dismiss(animated: true, completion: nil)
+    presentingViewController?.dismiss(animated: true, completion: nil)
   }
   
   

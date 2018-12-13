@@ -86,10 +86,31 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     self.view.addSubview(segmentedControl2)
     segmentedControl2.translatesAutoresizingMaskIntoConstraints = false
     let width = view.frame.width
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.centerX, relatedBy: NSLayoutConstraint.Relation.equal, toItem: segmentBG, attribute: NSLayoutConstraint.Attribute.centerX, multiplier: 1, constant: 0).isActive = true
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.topMargin, relatedBy: NSLayoutConstraint.Relation.equal, toItem: segmentBG, attribute: NSLayoutConstraint.Attribute.topMargin, multiplier: 1, constant: 7).isActive = true
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.width, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: width).isActive = true
-    NSLayoutConstraint(item: segmentedControl2, attribute: NSLayoutConstraint.Attribute.height, relatedBy: NSLayoutConstraint.Relation.equal, toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute, multiplier: 1, constant: 44).isActive = true
+    NSLayoutConstraint(item: segmentedControl2,
+                       attribute: NSLayoutConstraint.Attribute.centerX,
+                       relatedBy: NSLayoutConstraint.Relation.equal,
+                       toItem: segmentBG,
+                       attribute: NSLayoutConstraint.Attribute.centerX,
+                       multiplier: 1,
+                       constant: 0).isActive = true
+    NSLayoutConstraint(item: segmentedControl2,
+                       attribute: NSLayoutConstraint.Attribute.topMargin,
+                       relatedBy: NSLayoutConstraint.Relation.equal,
+                       toItem: segmentBG, attribute: NSLayoutConstraint.Attribute.topMargin,
+                       multiplier: 1,
+                       constant: 7).isActive = true
+    NSLayoutConstraint(item: segmentedControl2,
+                       attribute: NSLayoutConstraint.Attribute.width,
+                       relatedBy: NSLayoutConstraint.Relation.equal,
+                       toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute,
+                       multiplier: 1,
+                       constant: width).isActive = true
+    NSLayoutConstraint(item: segmentedControl2,
+                       attribute: NSLayoutConstraint.Attribute.height,
+                       relatedBy: NSLayoutConstraint.Relation.equal,
+                       toItem: nil, attribute: NSLayoutConstraint.Attribute.notAnAttribute,
+                       multiplier: 1,
+                       constant: 44).isActive = true
   }
   
   internal func xmSegmentedControl(_ xmSegmentedControl: XMSegmentedControl, selectedSegment: Int) {
@@ -315,18 +336,18 @@ class MeetingVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
   }
   
   @objc fileprivate func saveDeleteAlert(_ sender: UILongPressGestureRecognizer) {
-    let alert = UIAlertController(title: "Save?", message: "Do you want to save this image?", preferredStyle: UIAlertController.Style.alert)
+    let alert = UIAlertController(title: "Save?", message: "Do you want to save this image?", preferredStyle: UIAlertController.Style.actionSheet)
     
-    alert.addAction(UIAlertAction(title: "Save", style: UIAlertAction.Style.default, handler: { action in
+    alert.addAction(UIAlertAction(title: "Save", style: UIAlertAction.Style.default, handler: {[weak self] action in
       let imageview = sender.view as! SLImageView
-      self.saveTriggered(image: imageview.image!)
+      self?.saveTriggered(image: imageview.image!)
     }))
     let imageview = sender.view as! SLImageView
     guard let id2 = imageview.imageID else {return}
     let myname = self.myUser.userFirstName + " " + self.myUser.userLastName
     if myUser.userID == currentMeeting.teamAdmin || myname == imageview.uploader || myUser.userID == currentMeeting.meetingAdmin {
-      alert.addAction(UIAlertAction(title: "Delete", style: UIAlertAction.Style.destructive, handler: { action in
-        self.deleteTriggered(id:id2)
+      alert.addAction(UIAlertAction(title: "Delete", style: UIAlertAction.Style.destructive, handler: {[weak self] action in
+        self?.deleteTriggered(id:id2)
       }))
     }
     alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel, handler: nil))
@@ -682,12 +703,12 @@ let info = convertFromUIImagePickerControllerInfoKeyDictionary(info)
   }
   
   fileprivate func updateComments() {
-    meetingRef.child("Comments").child(currentMeeting.meetingID).queryOrderedByKey().observe(.childRemoved) { (snap) in
+    meetingRef.child("Comments").child(currentMeeting.meetingID).queryOrderedByKey().observe(.childRemoved) { _ in
       self.comments = []
       self.retrieveComments()
       self.commentstableView.reloadData()
     }
-    meetingRef.child("Comments").child(currentMeeting.meetingID).queryOrderedByKey().observe(.childAdded) { (snap) in
+    meetingRef.child("Comments").child(currentMeeting.meetingID).queryOrderedByKey().observe(.childAdded) { _ in
       self.comments = []
       self.retrieveComments()
       self.commentstableView.reloadData()

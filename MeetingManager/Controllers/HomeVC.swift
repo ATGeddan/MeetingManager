@@ -66,7 +66,6 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     checkAuth()
     updateMeetings()
     getTeamData()
-    updateNotifs()
     checkNextMeeting()
     
     hideNavBar()
@@ -87,12 +86,12 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   internal func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
     var count :Int!
     if meetings.count == 0 {
-      self.cellPlaceHolder.layer.cornerRadius = 5
-      self.cellPlaceHolder.isHidden = false
+      cellPlaceHolder.layer.cornerRadius = 5
+      cellPlaceHolder.isHidden = false
       count = 0
     } else {
-      self.cellPlaceHolder.layer.cornerRadius = 5
-      self.cellPlaceHolder.isHidden = true
+      cellPlaceHolder.layer.cornerRadius = 5
+      cellPlaceHolder.isHidden = true
       count = meetings.count
     }
     return count
@@ -119,14 +118,14 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   // MARK: Getting Meetings info & User info
   
   fileprivate func getMeetings() {
-    Database.database().reference().child("Teams").child(myUser.teamID).child("Meetings").observeSingleEvent(of: .value) { (snapshot) in
+    Database.database().reference().child("Teams").child(myUser.teamID).child("Meetings").observeSingleEvent(of: .value) {[weak self] (snapshot) in
       if let children = snapshot.children.allObjects as? [DataSnapshot] {
-        self.meetings = []
+        self?.meetings = []
         for child in children {
           if let dict = child.value as? [String:AnyObject] {
             let model = MeetingModel(dict)
-            self.meetings.insert(model, at: 0)
-            self.tableView.reloadData()
+            self?.meetings.insert(model, at: 0)
+            self?.tableView.reloadData()
           }
         }
       }
@@ -134,37 +133,37 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   }
   
   fileprivate func updateMeetings() {
-    Database.database().reference().child("Teams").child(myUser.teamID).child("Meetings").observe(.value) { (snap) in
-      self.meetings = []
-      self.getMeetings()
-      self.tableView.reloadData()
+    Database.database().reference().child("Teams").child(myUser.teamID).child("Meetings").observe(.value) {[weak self] (snap) in
+      self?.meetings = []
+      self?.getMeetings()
+      self?.tableView.reloadData()
     }
-    Database.database().reference().child("Teams").child(myUser.teamID).child("Meetings").observe(.childRemoved) { (snap) in
-      self.meetings = []
-      self.getMeetings()
-      self.tableView.reloadData()
+    Database.database().reference().child("Teams").child(myUser.teamID).child("Meetings").observe(.childRemoved) {[weak self] (snap) in
+      self?.meetings = []
+      self?.getMeetings()
+      self?.tableView.reloadData()
     }
   }
   
   fileprivate func getPersonalInfo() {
     guard let myID = Auth.auth().currentUser?.uid else {return}
     Database.database().reference().child("Users").child(myID).removeAllObservers()
-    Database.database().reference().child("Users").child(myID).observe(.value, with: { (snapshot) in
+    Database.database().reference().child("Users").child(myID).observe(.value, with: {[weak self] (snapshot) in
       if let dicts = snapshot.value as? [String:AnyObject] {
-        self.myUser.updateUser(dicts)
-        if self.myUser.teamID != "" {
-          let image = URL(string: self.myUser.imageURL)
-          self.sideImage.kf.setImage(with: image)
-          self.sideName.text = self.myUser.userFirstName + " " + self.myUser.userLastName
-          self.sideEmail.text = self.myUser.userEmail
+        self?.myUser.updateUser(dicts)
+        if self?.myUser.teamID != "" {
+          let image = URL(string: (self?.myUser.imageURL)!)
+          self?.sideImage.kf.setImage(with: image)
+          self?.sideName.text = (self?.myUser.userFirstName)! + " " + (self?.myUser.userLastName)!
+          self?.sideEmail.text = self?.myUser.userEmail
         } else {
           let alert = UIAlertController(title: "Removed", message: "You have been kicked from this team or the team itself is deleted", preferredStyle: UIAlertController.Style.alert)
           alert.addAction(UIAlertAction(title: "OK", style: .destructive, handler: { (action) in
-            self.myUser.teamID = ""
-            self.performSegue(withIdentifier: "backWelcome", sender: nil)
+            self?.myUser.teamID = ""
+            self?.performSegue(withIdentifier: "backWelcome", sender: nil)
           }))
-          self.navigationController?.popToRootViewController(animated: true)
-          self.present(alert, animated: true, completion: nil)
+          self?.navigationController?.popToRootViewController(animated: true)
+          self?.present(alert, animated: true, completion: nil)
         }
       }
     })
@@ -172,20 +171,20 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   }
   
   fileprivate func checkNewTasks() {
-    Database.database().reference().child("Teams").child(myUser.teamID).child("NewTasks").child(myUser.userID).observeSingleEvent(of: .value) { (snap) in
+    Database.database().reference().child("Teams").child(myUser.teamID).child("NewTasks").child(myUser.userID).observeSingleEvent(of: .value) {[weak self] (snap) in
       if let children = snap.children.allObjects as? [DataSnapshot] {
         if children.count > 0 {
-          self.taskNumber = children.count
-          self.newTasksSeen = false
-          self.checkNotifToggle()
-          self.newTaskNumber2.text = String(self.taskNumber)
-          self.notifBubble2.isHidden = false
-          self.newTaskNumber2.isHidden = false
+          self?.taskNumber = children.count
+          self?.newTasksSeen = false
+          self?.checkNotifToggle()
+          self?.newTaskNumber2.text = String(children.count)
+          self?.notifBubble2.isHidden = false
+          self?.newTaskNumber2.isHidden = false
         } else {
-          self.newTasksSeen = true
-          self.checkNotifToggle()
-          self.notifBubble2.isHidden = true
-          self.newTaskNumber2.isHidden = true
+          self?.newTasksSeen = true
+          self?.checkNotifToggle()
+          self?.notifBubble2.isHidden = true
+          self?.newTaskNumber2.isHidden = true
         }
       }
     }
@@ -193,18 +192,14 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   
   fileprivate func checkNewRequests() {
     if myUser.userID == team.adminID {
-      Database.database().reference().child("Teams").child(myUser.teamID).child("NewRequests").observeSingleEvent(of: .value) { snap in
+      Database.database().reference().child("Teams").child(myUser.teamID).child("NewRequests").observeSingleEvent(of: .value) {[weak self] snap in
         if let children = snap.children.allObjects as? [DataSnapshot] {
           if children.count > 0 {
-            self.requestsSeen = false
-            self.checkNotifToggle()
-            self.notifLabel4.isHidden = false
-            self.notifBubble4.isHidden = false
+            self?.requestsSeen = false
+            self?.checkNotifToggle()
           } else {
-            self.requestsSeen = true
-            self.checkNotifToggle()
-            self.notifLabel4.isHidden = true
-            self.notifBubble4.isHidden = true
+            self?.requestsSeen = true
+            self?.checkNotifToggle()
           }
         }
       }
@@ -212,55 +207,55 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   }
   
   fileprivate func updateNotifs() {
-    Database.database().reference().child("Teams").child(myUser.teamID).child("NewTasks").child(myUser.userID).observe(.childAdded) { _ in
-      self.checkNewTasks()
+    Database.database().reference().child("Teams").child(myUser.teamID).child("NewTasks").child(myUser.userID).observe(.childAdded) {[weak self] _ in
+      self?.checkNewTasks()
     }
-    Database.database().reference().child("Teams").child(myUser.teamID).child("NewTasks").child(myUser.userID).observe(.childRemoved) { _ in
-      self.taskNumber = 0
-      self.checkNewTasks()
+    Database.database().reference().child("Teams").child(myUser.teamID).child("NewTasks").child(myUser.userID).observe(.childRemoved) { [weak self]_ in
+      self?.taskNumber = 0
+      self?.checkNewTasks()
     }
     if myUser.userID == team.adminID {
-      Database.database().reference().child("Teams").child(myUser.teamID).child("NewRequests").observe(.childAdded) { _ in
-        self.checkNewRequests()
+      Database.database().reference().child("Teams").child(myUser.teamID).child("NewRequests").observe(.childAdded) {[weak self] _ in
+        self?.checkNewRequests()
       }
-      Database.database().reference().child("Teams").child(myUser.teamID).child("NewRequests").observe(.childRemoved) { _ in
-        self.checkNewRequests()
+      Database.database().reference().child("Teams").child(myUser.teamID).child("NewRequests").observe(.childRemoved) { [weak self]_ in
+        self?.checkNewRequests()
       }
     }
   }
   
   fileprivate func checkNotifToggle() {
     if !nextMeetingSeen || !newTasksSeen || !requestsSeen {
-      self.notifBubble.isHidden = false
-      self.newTaskNumber.isHidden = false
+      notifBubble.isHidden = false
+      newTaskNumber.isHidden = false
     } else {
-      self.notifBubble.isHidden = true
-      self.newTaskNumber.isHidden = true
+      notifBubble.isHidden = true
+      newTaskNumber.isHidden = true
     }
   }
   
   fileprivate func checkNextMeeting() {
     let ref = Database.database().reference().child("Teams").child(myUser.teamID).child("NextMeeting")
-    ref.child(myUser.userID).observe(.value) { (snap) in
+    ref.child(myUser.userID).observe(.value) {[weak self] (snap) in
       if let dict = snap.value as? [String:AnyObject] {
         let meeting = MeetingModel(dict)
-        self.nextMDate.text = meeting.meetingDate
-        self.nextMCity.text = meeting.meetingCity
-        self.nextMPlace.text = meeting.meetingPlace
-        self.nextID = meeting.meetingID
-        if self.myUser.userID == self.team.adminID {
-          self.cancelBtn.isHidden = false
+        self?.nextMDate.text = meeting.meetingDate
+        self?.nextMCity.text = meeting.meetingCity
+        self?.nextMPlace.text = meeting.meetingPlace
+        self?.nextID = meeting.meetingID
+        if self?.myUser.userID == self?.team.adminID {
+          self?.cancelBtn.isHidden = false
         }
         if meeting.seen == "false" {
-          self.nextMeetingSeen = false
-          self.checkNotifToggle()
-          self.notifBubble3.isHidden = false
-          self.nextNotifLabel.isHidden = false
+          self?.nextMeetingSeen = false
+          self?.checkNotifToggle()
+          self?.notifBubble3.isHidden = false
+          self?.nextNotifLabel.isHidden = false
         } else {
-          self.nextMeetingSeen = true
-          self.checkNotifToggle()
-          self.notifBubble3.isHidden = true
-          self.nextNotifLabel.isHidden = true
+          self?.nextMeetingSeen = true
+          self?.checkNotifToggle()
+          self?.notifBubble3.isHidden = true
+          self?.nextNotifLabel.isHidden = true
         }
         // Auto delete the meeting if time has passed - get Date from string
         let meetingFormat = meeting.formatDate
@@ -269,31 +264,31 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
         if let date33 = dateFormatter2.date(from: meetingFormat) {
           let now = Date()
           if date33 < now {
-            ref.child(self.myUser.userID).removeValue()
+            ref.child((self?.myUser.userID)!).removeValue()
           }
         }
       }
     }
     
-    ref.child(myUser.userID).observe(.childRemoved) { _ in
-      self.nextMeetingSeen = true
-      self.checkNotifToggle()
-      self.notifBubble3.isHidden = true
-      self.nextNotifLabel.isHidden = true
-      self.cancelBtn.isHidden = true
-      self.nextMDate.text = "Next Meeting has not been decided yet"
-      self.nextMPlace.text = ""
-      self.nextMCity.text = ""
+    ref.child(myUser.userID).observe(.childRemoved) { [weak self]_ in
+      self?.nextMeetingSeen = true
+      self?.checkNotifToggle()
+      self?.notifBubble3.isHidden = true
+      self?.nextNotifLabel.isHidden = true
+      self?.cancelBtn.isHidden = true
+      self?.nextMDate.text = "Next Meeting has not been decided yet"
+      self?.nextMPlace.text = ""
+      self?.nextMCity.text = ""
     }
   }
   
   @IBAction func cancelMeeting(_ sender: Any) {
     let alert = UIAlertController(title: "Are you sure?", message: "Do you want to cancel the next meeting?", preferredStyle: UIAlertController.Style.alert)
-    alert.addAction(UIAlertAction(title: "Sure", style: .destructive, handler: { _ in
-      self.confirmNextCancel()
+    alert.addAction(UIAlertAction(title: "Yes", style: .destructive, handler: { [weak self]_ in
+      self?.confirmNextCancel()
     }))
     alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel, handler: nil))
-    self.present(alert, animated: true, completion: nil)
+    present(alert, animated: true, completion: nil)
     
   }
   
@@ -303,23 +298,24 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   }
   
   fileprivate func getTeamData() {
-    Database.database().reference().child("Teams").child(myUser.teamID).child("teaminfo").observe(.value) { (snap) in
+    Database.database().reference().child("Teams").child(myUser.teamID).child("teaminfo").observe(.value) {[weak self](snap) in
       if let teamDict = snap.value as? [String:AnyObject] {
         let myTeam = Team(teamDict)
-        self.team = myTeam
-        self.teamName.text = myTeam.name
-        self.teamOrg.text = myTeam.organization
-        self.teamCountry.text = myTeam.country
-        self.teamInfo.text = myTeam.info
-        if myTeam.adminID == self.myUser.userID {
-          self.editTeamBtn.isHidden = false
+        self?.team = myTeam
+        self?.teamName.text = myTeam.name
+        self?.teamOrg.text = myTeam.organization
+        self?.teamCountry.text = myTeam.country
+        self?.teamInfo.text = myTeam.info
+        self?.updateNotifs()
+        if myTeam.adminID == self?.myUser.userID {
+          self?.editTeamBtn.isHidden = false
           if myTeam.joinStatus == "private" {
-            self.changeJoinStatus.setImage(#imageLiteral(resourceName: "button2On"), for: .normal)
+            self?.changeJoinStatus.setImage(#imageLiteral(resourceName: "button2On"), for: .normal)
           } else {
-            self.changeJoinStatus.setImage(#imageLiteral(resourceName: "button2Off"), for: .normal)
+            self?.changeJoinStatus.setImage(#imageLiteral(resourceName: "button2Off"), for: .normal)
           }
         } else {
-          self.editTeamBtn.isHidden = true
+          self?.editTeamBtn.isHidden = true
         }
       }
     }
@@ -386,15 +382,15 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
       if oldPassField.text == team.pass {
         if newPassField.text == confirmField.text {
           guard let newPass = newPassField.text else {return}
-          self.team.changePass(pass:newPass)
+          team.changePass(pass:newPass)
           Database.database().reference().child("Teams").child(self.myUser.teamID).child("teaminfo").updateChildValues(["password":newPass])
           Database.database().reference().child("teamRef").child(self.myUser.teamID).updateChildValues(["password":newPass])
-          self.openClosePass()
+          openClosePass()
         } else {
-          self.displayBasicAlert(title: "Passwords do not match", msg: "Make sure your new password matches the confirm password")
+          displayBasicAlert(title: "Passwords do not match", msg: "Make sure your new password matches the confirm password")
         }
       } else {
-        self.displayBasicAlert(title: "Incorrect", msg: "Old password is incorrect")
+        displayBasicAlert(title: "Incorrect", msg: "Old password is incorrect")
       }
     }
   }
@@ -415,16 +411,16 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   func openClosePass() {
     if viewTop.constant == 32 {
       confirmPassBtn.isHidden = false
-      UIView.animate(withDuration: 0.3) {
-        self.viewTop.constant = 208
-        self.view.layoutIfNeeded()
+      UIView.animate(withDuration: 0.3) {[weak self] in
+        self?.viewTop.constant = 208
+        self?.view.layoutIfNeeded()
       }
     } else {
-      UIView.animate(withDuration: 0.3) {
-        self.viewTop.constant = 32
-        self.view.layoutIfNeeded()
+      UIView.animate(withDuration: 0.3) {[weak self] in
+        self?.viewTop.constant = 32
+        self?.view.layoutIfNeeded()
       }
-      self.view.endEditing(true)
+      view.endEditing(true)
       confirmPassBtn.isHidden = true
       oldPassField.text = ""
       newPassField.text = ""
@@ -435,11 +431,11 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   @IBAction func deleteTeamPressed(_ sender: Any) {
     let alert = UIAlertController(title: "Are You Sure?", message: "Removing this team will delete all its related data", preferredStyle: UIAlertController.Style.alert)
     
-    alert.addAction(UIAlertAction(title: "Delete", style: UIAlertAction.Style.destructive, handler: { action in
-      self.deleteTriggered()
+    alert.addAction(UIAlertAction(title: "Delete", style: UIAlertAction.Style.destructive, handler: { [weak self]_ in
+      self?.deleteTriggered()
     }))
     alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel, handler: nil))
-    self.present(alert, animated: true, completion: nil)
+    present(alert, animated: true, completion: nil)
   }
   
   func deleteTriggered() {
@@ -486,22 +482,22 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     if myUser.userID != team.adminID {
       let alert = UIAlertController(title: "Are You Sure?", message: "Do you want to leave this team?", preferredStyle: UIAlertController.Style.alert)
       
-      alert.addAction(UIAlertAction(title: "Leave", style: UIAlertAction.Style.destructive, handler: { action in
-        self.leaveTriggered()
+      alert.addAction(UIAlertAction(title: "Leave", style: UIAlertAction.Style.destructive, handler: { [weak self]_ in
+        self?.leaveTriggered()
       }))
       alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel, handler: nil))
-      self.present(alert, animated: true, completion: nil)
+      present(alert, animated: true, completion: nil)
     } else {
-      self.displayBasicAlert(title: "You are the Admin", msg: "Please change the team admin first or delete the team if you are the only member")
+      displayBasicAlert(title: "You are the Admin", msg: "Please change the team admin first or delete the team if you are the only member")
     }
   }
   
   fileprivate func leaveTriggered() {
-    Database.database().reference().child("Teams").child(myUser.teamID).child("Members").child(myUser.userID).removeValue { (err, ref) in
+    Database.database().reference().child("Teams").child(myUser.teamID).child("Members").child(myUser.userID).removeValue {[weak self] (err, ref) in
       if err == nil {
-        Database.database().reference().child("Users").child(self.myUser.userID).updateChildValues(["team":""])
-        self.myUser.teamID = ""
-        self.performSegue(withIdentifier: "backWelcome", sender: self.myUser)
+        Database.database().reference().child("Users").child((self?.myUser.userID)!).updateChildValues(["team":""])
+        self?.myUser.teamID = ""
+        self?.performSegue(withIdentifier: "backWelcome", sender: self?.myUser)
       }
     }
   }
@@ -531,43 +527,43 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   
   @IBAction func menuBarPressed(_ sender: Any) {
     
-    if self.menuLeading.constant != -12 {
+    if menuLeading.constant != -12 {
       if editingTeam {
-        self.editTeam(self)
+        editTeam(self)
       }
-      UIView.animate(withDuration: 0.4) {
-        self.menuLeading.constant = -12
-        self.view.layoutIfNeeded()
+      UIView.animate(withDuration: 0.4) {[weak self] in
+        self?.menuLeading.constant = -12
+        self?.view.layoutIfNeeded()
       }
     } else {
-      UIView.animate(withDuration: 0.4) {
-        self.menuLeading.constant = -222
-        self.view.layoutIfNeeded()
+      UIView.animate(withDuration: 0.4) {[weak self] in
+        self?.menuLeading.constant = -222
+        self?.view.layoutIfNeeded()
       }
       if nextMeetingLeading.constant != -200 {
-        self.openCloseNext()
+        openCloseNext()
       }
     }
   }
   @IBAction func panGest(_ sender: UIPanGestureRecognizer) {
     if sender.state == .began || sender.state == .changed {
-      let translation = sender.translation(in: self.view).x
+      let translation = sender.translation(in: view).x
       if translation > 20 { // Swipe right
         if editingTeam {
-          self.editTeam(self)
+          editTeam(self)
         }
-        UIView.animate(withDuration: 0.4) {
-          self.menuLeading.constant = -12
+        UIView.animate(withDuration: 0.4) {[weak self] in
+          self?.menuLeading.constant = -12
           
-          self.view.layoutIfNeeded()
+          self?.view.layoutIfNeeded()
         }
       } else if translation < -20 { // Swipe left
-        UIView.animate(withDuration: 0.4) {
-          self.menuLeading.constant = -222
-          self.view.layoutIfNeeded()
+        UIView.animate(withDuration: 0.4) {[weak self] in
+          self?.menuLeading.constant = -222
+          self?.view.layoutIfNeeded()
         }
         if nextMeetingLeading.constant != -200 {
-          self.openCloseNext()
+          openCloseNext()
         }
       }
     }
@@ -580,18 +576,18 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
   
   fileprivate func openCloseNext() {
     if nextMeetingLeading.constant == -200 {
-      UIView.animate(withDuration: 0.3) {
-        self.nextMeetingLeading.constant = -14
-        self.view.layoutIfNeeded()
+      UIView.animate(withDuration: 0.3) {[weak self] in
+        self?.nextMeetingLeading.constant = -14
+        self?.view.layoutIfNeeded()
       }
       if nextMeetingSeen == false {
         let ref = Database.database().reference().child("Teams").child(myUser.teamID).child("NextMeeting")
         ref.child(myUser.userID).updateChildValues(["seen":"true"])
       }
     } else {
-      UIView.animate(withDuration: 0.3) {
-        self.nextMeetingLeading.constant = -200
-        self.view.layoutIfNeeded()
+      UIView.animate(withDuration: 0.3) {[weak self] in
+        self?.nextMeetingLeading.constant = -200
+        self?.view.layoutIfNeeded()
       }
     }
   }
@@ -602,16 +598,16 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     if myUser.userID != team.adminID {
       performSegue(withIdentifier: "createMeeting", sender: myUser)
     } else {
-      let alert = UIAlertController(title: "Add or Book?", message: "Do you want to add a meeting or book a future meeting and invite members?", preferredStyle: UIAlertController.Style.alert)
+      let alert = UIAlertController(title: "Add or Book?", message: "Do you want to add a meeting or book a future meeting and invite members?", preferredStyle: UIAlertController.Style.actionSheet)
       
-      alert.addAction(UIAlertAction(title: "Add Meeting", style: UIAlertAction.Style.default, handler: { action in
-        self.addTriggered()
+      alert.addAction(UIAlertAction(title: "Add Meeting", style: UIAlertAction.Style.default, handler: { [weak self]_ in
+        self?.addTriggered()
       }))
-      alert.addAction(UIAlertAction(title: "Future Meeting", style: UIAlertAction.Style.default, handler: { action in
-        self.futureTriggered()
+      alert.addAction(UIAlertAction(title: "Future Meeting", style: UIAlertAction.Style.default, handler: { [weak self]_ in
+        self?.futureTriggered()
       }))
       alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel, handler: nil))
-      self.present(alert, animated: true, completion: nil)
+      present(alert, animated: true, completion: nil)
     }
   }
   
@@ -635,7 +631,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
     changePassBtn.isHidden = true
     deleteButton.isHidden = true
     if viewTop.constant != 32 {
-      self.openClosePass()
+      openClosePass()
     }
     menuLeading.constant = -222
     if nextMeetingLeading.constant != -200 {
@@ -653,7 +649,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
       destination.currentMeeting = model
       destination.myUser = myUser
       if editingTeam {
-        self.editTeam(self)
+        editTeam(self)
       }
     }
     
@@ -664,7 +660,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
       des.myUser = user
       des.myTeam = team
       if editingTeam {
-        self.editTeam(self)
+        editTeam(self)
       }
     }
     
@@ -672,7 +668,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
       dest.myUser = user
       dest.myTeam = team
       if editingTeam {
-        self.editTeam(self)
+        editTeam(self)
       }
     }
     
@@ -688,7 +684,7 @@ class HomeVC: UIViewController,UITableViewDataSource,UITableViewDelegate {
       dest3.myUser = user
       dest3.myTeam = team
       if editingTeam {
-        self.editTeam(self)
+        editTeam(self)
       }
     }
   }

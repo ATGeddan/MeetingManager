@@ -71,19 +71,19 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
     guard let email = emailField.text ,let password = passField.text else { return }
     if passField.text == confirmField.text && firstField.text?.isEmpty == false && lastField.text?.isEmpty == false {
       SVProgressHUD.show()
-      Auth.auth().createUser(withEmail: email, password: password) { (user, error) in
+      Auth.auth().createUser(withEmail: email, password: password) {[weak self] (user, error) in
         if error != nil {
           if let errCode = AuthErrorCode(rawValue: error!._code) {
             
             switch errCode {
             case .invalidEmail:
-              self.displayBasicAlert(title: "Invalid E-mail", msg: "Please check the entered email address")
+              self?.displayBasicAlert(title: "Invalid E-mail", msg: "Please check the entered email address")
               
             case .emailAlreadyInUse:
-              self.displayBasicAlert(title: "E-mail already used", msg: "This e-mail has already signed up")
+              self?.displayBasicAlert(title: "E-mail already used", msg: "This e-mail has already signed up")
               
             case .weakPassword:
-              self.displayBasicAlert(title: "Weak Password", msg: "Make sure password is more than 6 characters")
+              self?.displayBasicAlert(title: "Weak Password", msg: "Make sure password is more than 6 characters")
               
             default:
               print("Other error!")
@@ -91,7 +91,7 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
             
           }
         } else {
-          self.createProfile()
+          self?.createProfile()
           SVProgressHUD.dismiss()
           
         }
@@ -119,12 +119,13 @@ class RegisterVC: UIViewController,UITextFieldDelegate {
                                              "joinStatus":""] as [String:AnyObject]
     let user = User(userDictionary)
     myUser = user
-    userDB.child(uid).setValue(userDictionary){
+    userDB.child(uid).setValue(userDictionary){[weak self]
       (error, reference) in
       if error != nil {
         print(error!.localizedDescription)
       } else {
-        self.performSegue(withIdentifier: "registered", sender: self.myUser)
+        self?.presentingViewController?.dismiss(animated: false, completion: nil)
+        self?.performSegue(withIdentifier: "registered", sender: self?.myUser)
       }
     }
     

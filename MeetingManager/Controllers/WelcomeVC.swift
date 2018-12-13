@@ -31,6 +31,7 @@ class WelcomeVC: UIViewController {
       try Auth.auth().signOut()
       Database.database().reference().child("Users").child(myID).removeAllObservers()
       performSegue(withIdentifier: "signedOut", sender: nil)
+      
     } catch {
       print(error.localizedDescription)
     }
@@ -99,11 +100,9 @@ class WelcomeVC: UIViewController {
     myID = Auth.auth().currentUser?.uid ?? ""
     Database.database().reference().child("Users").child(myID).removeAllObservers()
     Database.database().reference().child("Users").child(myID).observe(.value, with: { (snapshot) in
-      print("Snapshot here -----------------")
       if let dictionary = snapshot.value as? [String:AnyObject] {
         self.myUser.updateUser(dictionary)
         self.helloLabel.text = "Hello, \(self.myUser.userFirstName)"
-        print("User has been updated ------------ \(self.myUser.teamID!) +++++ \(self.myUser.joinStatus)")
         self.monitorMyTeamStatus()
       }
     })
